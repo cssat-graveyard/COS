@@ -80,12 +80,23 @@
 ###############################################################################
 ## Name the Application Instance
 
-MOS_instance_name <- "Exploring Cat Huggability"
+MOS_instance_name <- "The Case Outcome Simulator"
 
 ###############################################################################
 ## Import and Name the Data Object as Needed
 
-base_data <- read.csv("how_huggable_is_that_cat.csv")
+# source the base data and base model
+load("data_model_V4.RData")
+
+# explicitly choose the data object we will be working with
+# NOTE: incomplete cases will be dropped to avoid modeling/plotting issues
+base_data <- data[which(complete.cases(data)), ]
+
+# ensure the levels in the outcome variable are in RAGE order
+base_data$outcome <- factor(base_data$outcome, c("Reunification", 
+                                                 "Adoption",
+                                                 "Guardianship", 
+                                                 "Emancipation"))
 
 ###############################################################################
 ## Specify the Multinomial Logit Formula
@@ -94,12 +105,14 @@ base_data <- read.csv("how_huggable_is_that_cat.csv")
 # column names.
 base_formula <-
     # outcome column
-    huggable_or_not ~ 
+    outcome ~ 
     # additive terms
-    eye_size + whisker_length + claw_sharpness + color + cuddles_per_min +
-    objects_broken + gender +
+    mist_scores + wrkg_scores + recep_scores + buyn_scores + log_age_eps_begin + 
+    non_min + male + log_par_age + married + hhnum_c + rel_plc + log_eps_rank + 
+    housing_hs_cnt + high_in + sm_coll + employ + REG + 
     # interaction terms
-    claw_sharpness : cuddles_per_min
+    high_in : housing_hs_cnt + 
+    housing_hs_cnt : employ
 
 ###############################################################################
 ## Variable Configuration
@@ -140,26 +153,217 @@ base_formula <-
 # )
 
 variable_configuration <- list(   
-    whisker_length = list(
-        pretty_name         = "Whisker Length (Inches)",
-        definition          = paste0("A measurement of the cat's mean whisker ",
-                                     "length from skin to whisker tip."),
-        ribbon_plot_summary = paste0("As whisker length increases, the ",
-                                     "simulated likelihood of the kitty being ",
-                                     "huggable also increases."),
+    mist_scores = list(
+        pretty_name         = "Engagement: Parent Trusts Case Worker",
+        definition          = paste0("Parental belief that the agency or ", 
+                                     "worker is sincere, honest, or ",
+                                     "well-intentioned, with intent to help ",
+                                     "the client."),
+        ribbon_plot_summary = paste0("There is a positive association between ",
+                                     "this index of parental trust and ",
+                                     "Reunification: the likelihood that ",
+                                     "simulated cases end in Reunification ",
+                                     "increases as the trust index increases.",
+                                     "<br><br>The likelihood of both Adoption ",
+                                     "and Guardianship declines as the trust ",
+                                     "index increases. The likelihood of ",
+                                     "Emancipation (very unlikely) remains ",
+                                     "stable at all index levels."),
+        annotation          = c("<- less trust", "more trust ->"),
+        annotation1         = c("very low", "low", "moderate", "high", "very high"),
+        x_axis_candidate    = TRUE,
+        slider_candidate    = TRUE,
+        slider_rounding     = 1,
+        facet_candidate     = FALSE,
+        transform_for_ui    = function(x) abs(x - 3),
+        transform_for_model = function(x) -(x) + 3
+    ),    
+    wrkg_scores = list(
+        pretty_name         = paste0("Engagement: Working Relationship ",
+                                     "Between Parent and Case Worker"),
+        definition          = paste0("Parental perception of the ",
+                                     "interpersonal relationship with worker ",
+                                     "characterized by a sense of reciprocity ",
+                                     "or mutuality and good communication."),
+        ribbon_plot_summary = paste0("There is a positive, but weak, ",
+                                     "association between this index of the ",
+                                     "parent--agent relationship and ",
+                                     "Reunification: the likelihood that ",
+                                     "simulated cases end in Reunification ",
+                                     "slightly increases as the relationshp ",
+                                     "index increases.<br><br>The likelihood ",
+                                     "of Adoption declines as the ",
+                                     "relationship index increases. The ",
+                                     "likelihood of Guardianship (fairly ",
+                                     "unlikely) and Emancipation (very ",
+                                     "unlikely) remain stable all index ",
+                                     "levels."),
+        annotation          = c("<- worse relationship", "better relationship ->"),
+        x_axis_candidate    = TRUE,    
+        slider_candidate    = TRUE,
+        slider_rounding     = 1,
+        facet_candidate     = FALSE,
+        transform_for_ui    = function(x) x + 3,
+        transform_for_model = function(x) x - 3
+    ),   
+    recep_scores = list(
+        pretty_name         = "Engagement: Parent Receptivity",
+        definition          = paste0("Parental openness to receiving help, ",
+                                     "characterized by recognition of ", 
+                                     "problems or circumstances that resulted ",
+                                     "in agency intervention and by a ",
+                                     "perceived need for help."),
+        ribbon_plot_summary = paste0("The association between this index of ",
+                                     "parent receptivity and the case ",
+                                     "outcomes is very weak. In other words, ",
+                                     "this index - at least by itself - is ",
+                                     "has little effect on the likelihood of ",
+                                     "simulated case outcomes."),
+        annotation          = c("<- less receptivity", "more receptivity ->"),
+        x_axis_candidate    = TRUE,
+        slider_candidate    = TRUE,
+        slider_rounding     = 1,
+        facet_candidate     = FALSE,
+        transform_for_ui    = function(x) x + 3,
+        transform_for_model = function(x) x - 3
+    ),    
+    buyn_scores = list(
+        pretty_name         = "Engagement: Parent Buy-In",
+        definition          = paste0("Parental perception of benefit; a sense ",
+                                     "of being helped or the expectation of ",
+                                     "receiving help through the agency ",
+                                     "involvement; a feeling that things are ",
+                                     "changing (or will change) for the ",
+                                     "better. Also includes a commitment to ",
+                                     "the helping process, characterized by ",
+                                     "active participation in planning or ",
+                                     "services, goal ownership, and ",
+                                     "initiative in seeking and using help."),
+        ribbon_plot_summary = paste0("There is a positive association between ",
+                                     "this index of parental ",
+                                     "commitment/participation and ",
+                                     "Reunification: the likelihood that ",
+                                     "simulated cases end in Reunification ",
+                                     "increases as the buy-in index increases.",
+                                     "<br><br>The likelihood of Guardianship ",
+                                     "decreases as the buy-in index ",
+                                     "increases.The likelihood of Adoption ",
+                                     "(moderately likely) and Emancipation ",
+                                     "(very unlikely) remain stable."),
+        annotation          = c("<- less buy-in", "more buy-in ->"),
+        x_axis_candidate    = TRUE,
+        slider_candidate    = TRUE,
+        slider_rounding     = 1,
+        facet_candidate     = FALSE,
+        transform_for_ui    = function(x) x + 3,
+        transform_for_model = function(x) x - 3
+    ),    
+    log_age_eps_begin = list(
+        pretty_name         = "Child Age at Episode Begin",
+        definition          = paste0("The age of the child (in years) as of ",
+                                     "the start of their placement in ",
+                                     "out-of-home care."),
+        ribbon_plot_summary = paste0("There is a high likelihood that ",
+                                     "simulated cases end in Reunification if ",
+                                     "the case starts when the child about 2 ",
+                                     "to 12 years of age.<br><br>Prior to the ",
+                                     "second year, Adoption is also fairly ",
+                                     "likely - but it declines steeply from 0 ",
+                                     "to 5 years and then stabilizes until ",
+                                     "about 10 to 12 years.<br><br>The ",
+                                     "likelihood that simulated cases end in ",
+                                     "Guardianship slowly increases ",
+                                     "(complimenting the decline in Adoption) ",
+                                     "until about 12 years.<br><br>At 10 to ",
+                                     "12 years, Reunification, Adoption, and ",
+                                     "Guardianship become rapidly less likely ",
+                                     "as child age increases. Instead, ",
+                                     "Emancipation becomes increasingly ",
+                                     "likely. By 13 to 15 years of age, it is ",
+                                     "the most likely outcome for simulated ",
+                                     "cases."),
+        annotation          = NULL,
+        x_axis_candidate    = TRUE,
+        slider_candidate    = TRUE,
+        slider_rounding     = 1,
+        facet_candidate     = FALSE,
+        transform_for_ui    = function(x) exp(x) - 1,
+        transform_for_model = log1p
+    ),  
+    housing_hs_cnt = list(
+        pretty_name         = "Count of Housing Hardships",
+        definition          = paste0("The count of affirmative responses to ",
+                                     "survey questions concerning housing ",
+                                     "hardships (e.g. difficulty paying rent, ",
+                                     "couch-surfing, etc.)."),
+        ribbon_plot_summary = paste0("There is a strong negative assocation ",
+                                     "between this index of housing hardships ",
+                                     "and Reunification: the likelihood that ",
+                                     "simulated cases end in Reunification ",
+                                     "decreases as the housing hardship index ",
+                                     "increases.<br><br>The likelihood of ",
+                                     "Adoption increases as the housing ",
+                                     "hardship index increases. Guardianship ",
+                                     "(unlikely) and Emancipation (very ",
+                                     "unlikely) remain stable at all index ",
+                                     "levels."),
+        annotation          = NULL,
         x_axis_candidate    = TRUE,
         slider_candidate    = TRUE,
         slider_rounding     = 1,
         facet_candidate     = FALSE,
         transform_for_ui    = identity,
         transform_for_model = identity
-    ),    
-    gender = list(
-        pretty_name         = paste0("Cat Gender"),
-        definition          = paste0("A description of the cat's apparent ",
-                                     "biological sex."),
+    ),   
+    REG = list(
+        pretty_name         = "Administrative Region",
+        definition          = paste0("An indicator of the administrative ",
+                                     "region of the child welfare case."),
         ribbon_plot_summary = paste0(""),
-        x_axis_candidate    = FALSE,    
+        annotation          = NULL,
+        x_axis_candidate    = FALSE,
+        slider_candidate    = FALSE,
+        slider_rounding     = NA,
+        facet_candidate     = TRUE,
+        transform_for_ui    = identity,
+        transform_for_model = identity
+    ),
+    employ = list(
+        pretty_name         = "Parental Employment Status",
+        definition          = paste0("An indicator as to whether or not the ",
+                                     "parent reported full or part-time ",
+                                     "employment."),
+        ribbon_plot_summary = paste0(""),
+        annotation          = NULL,
+        x_axis_candidate    = FALSE,
+        slider_candidate    = FALSE,
+        slider_rounding     = NA,
+        facet_candidate     = TRUE,
+        transform_for_ui    = identity,
+        transform_for_model = identity
+    ),
+    sm_coll = list(
+        pretty_name         = "Parental Education Level",
+        definition          = paste0("An indicator as to whether or not the ",
+                                     "parent reported any education beyond ",
+                                     "high-school."),
+        ribbon_plot_summary = paste0(""),
+        annotation          = NULL,
+        x_axis_candidate    = FALSE,
+        slider_candidate    = FALSE,
+        slider_rounding     = NA,
+        facet_candidate     = TRUE,
+        transform_for_ui    = identity,
+        transform_for_model = identity
+    ),
+    high_in = list(
+        pretty_name         = "Parental Income Status",
+        definition          = paste0("An indicator as to whether or not the ",
+                                     "reported parental income is less than ",
+                                     "(or equal to) 10,000 dollars."),
+        ribbon_plot_summary = paste0(""),
+        annotation          = NULL,
+        x_axis_candidate    = FALSE,
         slider_candidate    = FALSE,
         slider_rounding     = NA,
         facet_candidate     = TRUE,
@@ -171,10 +375,11 @@ variable_configuration <- list(
 ###############################################################################
 ## Custom Visualization Colors (Optional)
 
-# Colors are applied in the order they are given to outcomes in level order
-# (e.g., first outcome level is paired with the first color, etc.).
+# Colors are applied in the order they are given to outcomes in level order.
 # If no custom colors are desired, set this to NULL.
-custom_outcome_colors <- c("#D9BB32", "#6DB33F")
+custom_outcome_colors <- c("#D9BB32", "#6DB33F", "#6E9CAE", "#B1662B", 
+                           "#5B8067", "#444D3E", "#994D3E", "#10475B", 
+                           "#7D6E86", "#D47079", "#262F1D", "#B0B0B0")
 
 ###############################################################################
 ## Custom bootstrap.css (Optional)
@@ -182,10 +387,8 @@ custom_outcome_colors <- c("#D9BB32", "#6DB33F")
 # Custom bootstrap.css file must be in the www subdirectory of the MOS
 # application. Set "custom_css" to NULL if you don't want to use one.
 custom_css = "bootstrap.css"
-
-# NOTE: This CSS example theme was provided by the nifty bootswatch.com here:
-# https://bootswatch.com/sandstone/
-# Check them out for other pre-made boostrap files.
+# CSS theme for entire project (current theme from here:
+# https://bootswatch.com/sandstone/)
 
 ###############################################################################
 ## Ribbon Plot Addendum (Optional)
@@ -197,14 +400,19 @@ custom_css = "bootstrap.css"
 ribbon_addendum <-
     paste0("<br><strong>Please Keep In Mind</strong>",
            
-           "<br>This simulation cannot tell if the observed relationships are",
+           "<br>Our simulation cannot tell if the observed relationships are",
            "causal or correlational.",
            
            "<br><br><strong>What Is This Simulation Based On?</strong>",
            
-           "<br>The simulation is modeled on real data: a survey of 32 cats ",
-           "conducted by a trained researcher. The survey was conducted in ",
-           "a suburb in Seattle, WA.")
+           "<br>The simulation is modeled on real data: a survey of child ",
+           "welfare-involved parents performed in 2008 by Partners for Our ",
+           "Children and linked to administrative data from Children's ",
+           "Administration.",
+           
+           "<br><br>The data is of limited scope, it includes only cases ",
+           "where the child was removed with an active dependency petition ",
+           "and entered care in 2008 in Washington State.")
 
 ###############################################################################
 ## Dot Cloud Plot Addendum (Optional)
@@ -217,10 +425,10 @@ ribbon_addendum <-
 dot_cloud_addendum <- 
     paste0("<strong>What Does This Graph Show Us?</strong>",
            
-           "<br>Each time the 'SIMULATE' button is clicked, the cat you ",
-           "described (i.e., the values you set the inputs to) is run through ",
-           "1000 versions of the cat huggability model. These versions vary ",
-           "based on how much uncertainty there is in the model."
+           "<br>Each time the 'SIMULATE' button is clicked, the child welfare ",
+           "case you described (i.e., the values you set the inputs to) is ",
+           "run through 1000 versions of our case outcome model. These ",
+           "versions vary based on how much uncertainty there is in the model."
            
            "<br><br>For each model run, we get an estimate of how likely ",
            "the four outcomes are. We plot every estimate by its outcome.",
@@ -234,9 +442,14 @@ dot_cloud_addendum <-
            
            "<br><br><strong>What Is This Simulation Based On?</strong>",
            
-           "<br>The simulation is modeled on real data: a survey of 32 cats ",
-           "conducted by a trained researcher. The survey was conducted in ",
-           "a suburb in Seattle, WA.")
+           "<br>The simulation is modeled on real data: a survey of child ",
+           "welfare-involved parents performed in 2008 by Partners for Our ",
+           "Children and linked to administrative data from Children's ",
+           "Administration.",
+           
+           "<br><br>The data is of limited scope, it includes only cases ",
+           "where the child was removed with an active dependency petition ",
+           "and entered care in 2008 in Washington State.")
 
 ###############################################################################
 ## END OF SCRIPT
