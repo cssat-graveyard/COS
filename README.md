@@ -184,7 +184,9 @@ If the app of interest is in a sub-directory (most likely), then it may be easie
 ### GAME ON!!
 At this point, you are either admiring your Shiny application or troubleshooting your way there. Congrats or best of luck, as needed!
 
-## Setting Up a Mirror to Get MOS Application Updates
+## Getting MOS Application Updates
 Unfortunately, because the COS repository is private it cannot be a standard fork of the MOS_framework repository. Instead, is a duplicate of that repository.
 
-To get updates from the MOS_framework repository, we need to clone a mirror of that repository and set our clone to push changes to the COS repository. Directions for this are provided [here](https://help.github.com/articles/duplicating-a-repository/).
+To get updates from the MOS\_framework repository, we need to manually grab the current MOS\_framework files (e.g., by creating a separate clone of the repo or downloading them via a web browser).
+
+Files to grab: Everything *except* README.md and MOS_config.R. Those two files are tailored to the COS application.
