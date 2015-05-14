@@ -428,7 +428,7 @@ dot_cloud_addendum <-
            "<br>Each time the 'SIMULATE' button is clicked, the child welfare ",
            "case you described (i.e., the values you set the inputs to) is ",
            "run through 1000 versions of our case outcome model. These ",
-           "versions vary based on how much uncertainty there is in the model."
+           "versions vary based on how much uncertainty there is in the model.",
            
            "<br><br>For each model run, we get an estimate of how likely ",
            "the four outcomes are. We plot every estimate by its outcome.",
@@ -438,7 +438,7 @@ dot_cloud_addendum <-
            
            "<br><br>The resulting graph gives us a sense of which outcomes ",
            "tend to be more likely and how much uncertainty there is in the ",
-           "simulation.",
+           "model.",
            
            "<br><br><strong>What Is This Simulation Based On?</strong>",
            
