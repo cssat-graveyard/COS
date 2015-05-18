@@ -132,6 +132,7 @@ shinyServer(function(input, output, session) {
                       variables_to_drop = isolate(x_axis_raw_name())),
         
         ({updateButton(session, "update_explore_cf_cases",
+                       label = "UPDATE PLOT",
                        disabled = FALSE,
                        style = "danger")
         })
@@ -141,7 +142,7 @@ shinyServer(function(input, output, session) {
         input$update_explore_cf_cases,
         
         ({updateButton(session, "update_explore_cf_cases",
-                       label = "UP TO DATE",
+                       label = "PLOT UPDATED",
                        disabled = TRUE,
                        style = "success")
           
@@ -157,13 +158,13 @@ shinyServer(function(input, output, session) {
                       use_slider_values = TRUE,
                       use_dropdown_values = TRUE),
         
-        ({if(input$update_sc_cf_cases == 0) {
+        ({if(isolate(input$update_sc_cf_cases) == 0) {
             updateButton(session, "update_sc_cf_cases",
                          label = "RUN FIRST SIMULATION",
                          style = "warning")
         } else {
             updateButton(session, "update_sc_cf_cases",
-                         label = "SIMULATE",
+                         label = "RE-SIMULATE",
                          disabled = FALSE,
                          style = "danger")
         }
@@ -174,6 +175,7 @@ shinyServer(function(input, output, session) {
         input$update_sc_cf_cases,
         
         ({updateButton(session, "update_sc_cf_cases",
+                       label = "SIMULATION UPDATED",
                        disabled = TRUE,
                        style = "success")
           
