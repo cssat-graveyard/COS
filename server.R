@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/23/2015
-# Date updated: 5/13/2015
+# Date updated: 5/18/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -78,7 +78,7 @@ coeff_estimates <<- get_coefficient_estimates(1000, point_estimates,
                                               cov_matrix, exp_model)
 
 ###############################################################################
-## shinyServer Loop (Steps That Do Need To Be Reactive)
+## shinyServer Loop (Steps That Need To Be Reactive)
 
 shinyServer(function(input, output, session) {
     ## Collect user inputs.
@@ -120,6 +120,57 @@ shinyServer(function(input, output, session) {
                     append_name = "sc",
                     facet_as_dropdown = TRUE)
     })
+    
+    # enable/disable update/simulate button for for "Explore Mode"
+    observeEvent(
+        return_inputs(variable_config_list = variable_configuration,
+                      input_call = input,               
+                      append_name = "explore",
+                      base_data = base_data,
+                      use_slider_values = TRUE,
+                      use_dropdown_values = FALSE,
+                      variables_to_drop = isolate(x_axis_raw_name())),
+        
+        ({updateButton(session, "update_explore_cf_cases",
+                       disabled = FALSE,
+                       style = "danger")
+        })
+    )
+    
+    observeEvent(
+        input$update_explore_cf_cases,
+        
+        ({updateButton(session, "update_explore_cf_cases",
+                       disabled = TRUE,
+                       style = "success")
+          
+        })
+    )
+    
+    # enable/disable update/simulate button for "Single Case Mode"
+    observeEvent(
+        return_inputs(variable_config_list = variable_configuration,
+                      input_call = input,               
+                      append_name = "sc",
+                      base_data = base_data,
+                      use_slider_values = TRUE,
+                      use_dropdown_values = TRUE),
+        
+        ({updateButton(session, "update_sc_cf_cases",
+                       disabled = FALSE,
+                       style = "danger")
+        })
+    )
+    
+    observeEvent(
+        input$update_sc_cf_cases,
+        
+        ({updateButton(session, "update_sc_cf_cases",
+                       disabled = TRUE,
+                       style = "success")
+          
+        })
+    )
     
     ## Create the base counterfactual case set.
     base_cf_cases <- reactive({

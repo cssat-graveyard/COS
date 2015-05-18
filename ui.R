@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/23/2015
-# Date updated: 5/13/2015
+# Date updated: 5/18/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -136,8 +136,9 @@ shinyUI(navbarPage(
                        # only show if the "Advanced Options" box is ticked
                        condition = "input.slider_show == true",
                        
-                       actionButton("update_explore_cf_cases",
-                                    "Update Plot"),
+                       bsButton("update_explore_cf_cases",
+                                "Update Plot",
+                                block = TRUE),
                        br(),
                        br(),
                        
@@ -166,8 +167,9 @@ shinyUI(navbarPage(
                wellPanel(
                    helpText(h4("Case Values")),
                    
-                   actionButton("update_sc_cf_cases",
-                                "Simulate"),
+                   bsButton("update_sc_cf_cases",
+                            "Simulate",
+                            block = TRUE),
                    br(),
                    br(),
                    

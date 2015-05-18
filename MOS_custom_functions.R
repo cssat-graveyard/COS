@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/25/2015
-# Date updated: 5/13/2015
+# Date updated: 5/18/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -62,6 +62,9 @@
 #     create the user inputs, and apply the values from the user inputs.
 #   - A function to define the ribbon plot summaries based on variable
 #     configuration features.
+#   - A function to simply request all the values for the input collections.
+#     This is primarily useful for testing if the inputs have been interacted
+#     with.
 
 ###############################################################################
 ## Load Supporting Packages
@@ -1042,7 +1045,7 @@ apply_input_values <- function(update_target,
     }
     
     # if a vector of variables to drop has been provided, adjust their indices 
-    # to FALSE so sliders are not made for them (this is primary use for this
+    # to FALSE so inputs are not made for them (this is primary use for this
     # is dropping the x-axis variable when needed)
     if(!is.na(variables_to_drop)) {
         for(index in 1:length(variables_to_drop)) {
@@ -1175,6 +1178,55 @@ build_ribbon_summary <- function(x_axis_raw_name, variable_config_list) {
     
     # return the text string
     return(ribbon_summary)
+}
+
+# We need to be able to simply return the collections of inputs. This will
+# allow us to test for when inputs in the collection have changed. The primary
+# use for this is adjusting the Update/Simulate buttons to get user attention.
+return_inputs <- function(variable_config_list,
+                          input_call,
+                          append_name,
+                          base_data,
+                          use_slider_values = TRUE,
+                          use_dropdown_values = FALSE,
+                          variables_to_drop = NA) {
+    # index which variables are input candidates - the way we build this index
+    # will depend on which input source(s) we want to apply
+    if(use_slider_values == TRUE & use_dropdown_values == FALSE) {
+        input_index <- unlist(lapply(variable_config_list, 
+                                     function(x) x$slider_candidate == TRUE))
+    } else if(use_slider_values == TRUE & use_dropdown_values == TRUE) {
+        input_index <- unlist(lapply(variable_config_list, 
+                                     function(x) x$slider_candidate == TRUE ||
+                                         x$facet_candidate == TRUE))
+    } else {
+        input_index <- unlist(lapply(variable_config_list, 
+                                     function(x) x$facet_candidate == TRUE))
+    }
+    
+    # if a vector of variables to drop has been provided, adjust their indices 
+    # to FALSE so inputs are not made for them (this is primary use for this
+    # is dropping the x-axis variable when needed)
+    if(!is.na(variables_to_drop)) {
+        for(index in 1:length(variables_to_drop)) {
+            input_index[variables_to_drop[index]] <- FALSE
+        }
+    }
+    
+    # subset variable_config_list to just get the input candidates
+    selected_inputs <- variable_config_list[input_index]
+    
+    # return the current slider values (triggering reactive link to each)
+    input_values <- c()
+    for(i in 1:length(selected_inputs)) {
+        # grab the key details
+        current_var <- names(selected_inputs)[[i]]
+        input_name <- paste0(append_name, "_", current_var)
+        input_values <- c(input_values, input_call[[input_name]])
+    }
+    
+    # return the values to avoid funky return errors
+    return(input_values)
 }
 
 ###############################################################################

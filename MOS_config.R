@@ -400,7 +400,7 @@ custom_css = "bootstrap.css"
 ribbon_addendum <-
     paste0("<br><strong>Please Keep In Mind</strong>",
            
-           "<br>Our simulation cannot tell if the observed relationships are",
+           "<br>Our simulation cannot tell if the observed relationships are ",
            "causal or correlational.",
            
            "<br><br><strong>What Is This Simulation Based On?</strong>",
