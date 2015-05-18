@@ -141,6 +141,7 @@ shinyServer(function(input, output, session) {
         input$update_explore_cf_cases,
         
         ({updateButton(session, "update_explore_cf_cases",
+                       label = "UP TO DATE",
                        disabled = TRUE,
                        style = "success")
           
@@ -156,9 +157,16 @@ shinyServer(function(input, output, session) {
                       use_slider_values = TRUE,
                       use_dropdown_values = TRUE),
         
-        ({updateButton(session, "update_sc_cf_cases",
-                       disabled = FALSE,
-                       style = "danger")
+        ({if(input$update_sc_cf_cases == 0) {
+            updateButton(session, "update_sc_cf_cases",
+                         label = "RUN FIRST SIMULATION",
+                         style = "warning")
+        } else {
+            updateButton(session, "update_sc_cf_cases",
+                         label = "SIMULATE",
+                         disabled = FALSE,
+                         style = "danger")
+        }
         })
     )
     
