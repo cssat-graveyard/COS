@@ -658,7 +658,7 @@ get_ribbon_plot <- function(formatted_likelihoods,
     # if a facet variable is set, add the facet layer to the plot object
     if(!is.null(facet_selected)) {
         plot_object <- plot_object + 
-            facet_wrap(~ facet, ncol = 2)
+            facet_wrap(~ facet, ncol = 3)
     }
     
     # return the plot object
@@ -1163,18 +1163,28 @@ apply_input_values <- function(update_target,
 
 # We need to summarize the key details of each ribbon plot. This builds a text
 # string (with HTML formatting) that can be used for that purpose.
-build_ribbon_summary <- function(x_axis_raw_name, variable_config_list) {
+build_ribbon_summary <- function(x_axis_raw_name, 
+                                 variable_config_list,
+                                 include_plot_summary) {
     
     # extract the matching config variable
     target <- variable_config_list[[x_axis_raw_name]]
     
     # combine the relevant variable features to make the summary
-    ribbon_summary <- paste0(
-        "<strong>", target$pretty_name, "</strong><br>",
-        target$definition, "<br><br>",
-        "<strong>Key Trends</strong><br>",
-        target$ribbon_plot_summary
-    )
+    if(include_plot_summary) {
+        ribbon_summary <- paste0(
+            "<strong>", target$pretty_name, "</strong><br>",
+            target$definition, "<br><br>",
+            "<strong>Key Trends</strong><br>",
+            target$ribbon_plot_summary
+        )
+    } else {
+        ribbon_summary <- paste0(
+            "<strong>", target$pretty_name, "</strong><br>",
+            target$definition, "<br><br>",
+            "<strong>Key Trends</strong><br>",
+            "Not available when using Advanced Options.")
+    }
     
     # return the text string
     return(ribbon_summary)
