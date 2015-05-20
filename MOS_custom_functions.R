@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/25/2015
-# Date updated: 5/18/2015
+# Date updated: 5/20/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -335,10 +335,11 @@ get_cf_cases <- function(exp_data,
 #          simulation and avoids issues that arise as confidence intervals get
 #          narrow (e.g., the mean falling outside the upper and lower 
 #          quartiles).
-#       2. Allows the user to request the "cloud" that results from feeding
-#          the represenative data to the coefficient estimates. This prevents
-#          the normal function behavior, which returns a summary of these 
-#          results for each case in the representative data.
+#       2. Allows the user to request the un-summarized likelihoods that results 
+#          from feeding the first case of represenative data to the coefficient 
+#          estimates. This prevents the normal function behavior, which returns 
+#          a summary of the likelihoods across all the coefficient sets for 
+#          each case.
 #       3. Adjusts order of the outcome columns to match intuitive expectations
 #          (reference outcome is ordered as the FIRST column rather than LAST).
 #          Originally, the reference outcome was ordered as the LAST column, but
@@ -346,8 +347,13 @@ get_cf_cases <- function(exp_data,
 MOS_mlogitsimev <- function (x, b, ci = 0.95, constant = 1, z = NULL, g = NULL, 
                              predict = FALSE, sims = 10, 
                              ## REVISION ##
-                             # added return_cloud argument
-                             return_cloud = FALSE) 
+                             # added return_first_case_likelihoods argument - 
+                             # if TRUE, the function will be interrupted after 
+                             # feeding the first row of counterfactual data to  
+                             # the coefficients and we'll get back the 
+                             # unsummarized likelihood for each coefficient set 
+                             # for that single row
+                             return_first_case_likelihoods = FALSE) 
 {
     if (!is.array(b)) {
         stop("b must be an array")
@@ -435,10 +441,10 @@ MOS_mlogitsimev <- function (x, b, ci = 0.95, constant = 1, z = NULL, g = NULL,
         # reorder columns so the REFERENCE OUTCOME is now the FIRST column
         simy <- simy[, c(4, 1:3)]
         
-        
         ## REVISION ##
-        # return the cloud of estimates if requested
-        if(return_cloud) {
+        # if requested, return the first case likelihoods for each coefficient
+        # set
+        if(return_first_case_likelihoods) {
             return(simy)
         }
         
@@ -610,8 +616,7 @@ get_ribbon_plot <- function(formatted_likelihoods,
                             x_lab = "Predictor", 
                             y_lab = "Probability of Outcome",
                             custom_colors = NULL,
-                            annotation = FALSE,
-                            annotation1 = NULL) {
+                            custom_x_axis_ticks = NULL) {
     
     plot_object <- ggplot(formatted_likelihoods, 
                           aes(x = predictor, group = group)) +
@@ -631,22 +636,12 @@ get_ribbon_plot <- function(formatted_likelihoods,
         MOS_theme +
         guides(fill = guide_legend(title = NULL))
     
-    # if x-axis annotations are provided, add these to an appropriate place
+    # if custom_x_axis_ticks are provided, add these to an appropriate place
     # inside the plot
-    if(!is.null(annotation)) {
-        plot_object <- plot_object + 
-            annotate(geom = "text", 
-                     label = annotation,
-                     x = c(1.5, 4.5),
-                     y = 0.025,
-                     size = 4,
-                     color = "#444040")
-    }
-    
-    if(!is.null(annotation1)) {
+    if(!is.null(custom_x_axis_ticks)) {
         plot_object <- plot_object +
             scale_x_continuous(expand = c(0, 0), 
-                               labels = annotation1)
+                               labels = custom_x_axis_ticks)
     }
     
     # if custom colors are provided, adjust the color scale and update theme
@@ -659,6 +654,14 @@ get_ribbon_plot <- function(formatted_likelihoods,
     if(!is.null(facet_selected)) {
         plot_object <- plot_object + 
             facet_wrap(~ facet, ncol = 3)
+        # if custom x-axis ticks are provided, also want to tweak the x-axis
+        # tick text and orientation to minimize collisions/overlap between
+        # facets
+        if(!is.null(custom_x_axis_ticks)) {
+            plot_object <- plot_object +
+                theme(axis.text.x = element_text(size = 8, angle = 90),
+                      panel.margin = unit(1, "lines"))
+        }
     }
     
     # return the plot object
@@ -676,7 +679,7 @@ get_dot_cloud_plot <- function(formatted_likelihoods,
         # the geoms
         geom_jitter(position = position_jitter(width = 0.25, height = 0)) +
         # label adjustments
-        labs(title = "The Likelihood of Each Outcome for Over 1000 Simulations",
+        labs(title = "The Likelihood of Each Outcome Across 1000 Simulations",
              x = x_lab, y = y_lab) +
         # scale adjustments
         scale_x_discrete(limits = rev(levels(formatted_likelihoods$outcome))) +

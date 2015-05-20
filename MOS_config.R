@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 5/12/2015
-# Date updated: 5/14/2015
+# Date updated: 5/20/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -129,6 +129,11 @@ base_formula <-
 #                               ribbon plot when this variable is seleted as
 #                               the x-axis (OPTIONAL, only useful for slider
 #                               variables),
+#         custom_x_axis_ticks = NULL or a character vector with as many items
+#                               as there are ribbon plot x-axis ticks; the
+#                               x-axis tick labels will be replaced with the
+#                               character vector items in the order they are
+#                               given
 #         x_axis_candiate     = TRUE or FALSE, allow the variable to be
 #                               selected as the x-axis on the ribbon plot
 #                               (REQUIRED),
@@ -169,8 +174,9 @@ variable_configuration <- list(
                                      "index increases. The likelihood of ",
                                      "Emancipation (very unlikely) remains ",
                                      "stable at all index levels."),
-        annotation          = c("<- less trust", "more trust ->"),
-        annotation1         = c("very low", "low", "moderate", "high", "very high"),
+        custom_x_axis_ticks = c("very low", "low", 
+                                "moderate", 
+                                "high", "very high"),
         x_axis_candidate    = TRUE,
         slider_candidate    = TRUE,
         slider_rounding     = 1,
@@ -198,7 +204,9 @@ variable_configuration <- list(
                                      "unlikely) and Emancipation (very ",
                                      "unlikely) remain stable all index ",
                                      "levels."),
-        annotation          = c("<- worse relationship", "better relationship ->"),
+        custom_x_axis_ticks = c("very low", "low", 
+                                "moderate", 
+                                "high", "very high"),
         x_axis_candidate    = TRUE,    
         slider_candidate    = TRUE,
         slider_rounding     = 1,
@@ -219,7 +227,9 @@ variable_configuration <- list(
                                      "this index - at least by itself - is ",
                                      "has little effect on the likelihood of ",
                                      "simulated case outcomes."),
-        annotation          = c("<- less receptivity", "more receptivity ->"),
+        custom_x_axis_ticks = c("very low", "low", 
+                                "moderate", 
+                                "high", "very high"),
         x_axis_candidate    = TRUE,
         slider_candidate    = TRUE,
         slider_rounding     = 1,
@@ -250,7 +260,9 @@ variable_configuration <- list(
                                      "increases.The likelihood of Adoption ",
                                      "(moderately likely) and Emancipation ",
                                      "(very unlikely) remain stable."),
-        annotation          = c("<- less buy-in", "more buy-in ->"),
+        custom_x_axis_ticks = c("very low", "low", 
+                                "moderate", 
+                                "high", "very high"),
         x_axis_candidate    = TRUE,
         slider_candidate    = TRUE,
         slider_rounding     = 1,
@@ -282,7 +294,7 @@ variable_configuration <- list(
                                      "likely. By 13 to 15 years of age, it is ",
                                      "the most likely outcome for simulated ",
                                      "cases."),
-        annotation          = NULL,
+        custom_x_axis_ticks = NULL,
         x_axis_candidate    = TRUE,
         slider_candidate    = TRUE,
         slider_rounding     = 1,
@@ -307,7 +319,7 @@ variable_configuration <- list(
                                      "(unlikely) and Emancipation (very ",
                                      "unlikely) remain stable at all index ",
                                      "levels."),
-        annotation          = NULL,
+        custom_x_axis_ticks = NULL,
         x_axis_candidate    = TRUE,
         slider_candidate    = TRUE,
         slider_rounding     = 1,
@@ -320,7 +332,7 @@ variable_configuration <- list(
         definition          = paste0("An indicator of the administrative ",
                                      "region of the child welfare case."),
         ribbon_plot_summary = paste0(""),
-        annotation          = NULL,
+        custom_x_axis_ticks = NULL,
         x_axis_candidate    = FALSE,
         slider_candidate    = FALSE,
         slider_rounding     = NA,
@@ -334,7 +346,7 @@ variable_configuration <- list(
                                      "parent reported full or part-time ",
                                      "employment."),
         ribbon_plot_summary = paste0(""),
-        annotation          = NULL,
+        custom_x_axis_ticks = NULL,
         x_axis_candidate    = FALSE,
         slider_candidate    = FALSE,
         slider_rounding     = NA,
@@ -348,7 +360,7 @@ variable_configuration <- list(
                                      "parent reported any education beyond ",
                                      "high-school."),
         ribbon_plot_summary = paste0(""),
-        annotation          = NULL,
+        custom_x_axis_ticks = NULL,
         x_axis_candidate    = FALSE,
         slider_candidate    = FALSE,
         slider_rounding     = NA,
@@ -362,7 +374,7 @@ variable_configuration <- list(
                                      "reported parental income is less than ",
                                      "(or equal to) 10,000 dollars."),
         ribbon_plot_summary = paste0(""),
-        annotation          = NULL,
+        custom_x_axis_ticks = NULL,
         x_axis_candidate    = FALSE,
         slider_candidate    = FALSE,
         slider_rounding     = NA,

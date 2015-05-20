@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/23/2015
-# Date updated: 5/18/2015
+# Date updated: 5/20/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -276,13 +276,18 @@ shinyServer(function(input, output, session) {
     })
     
     # get the "Single Case Mode" likelihoods (note that here we retain all the
-    # likelihood sets for each case - we don't summarize them)
+    # likelihood sets for just the first case; this works because all of the
+    # cases are actually identical in single case - we don't want summarized
+    # values per case, we want the raw likelihoods associated with each
+    # coefficient set for our specific example case)
     sc_likelihoods <- reactive({
-        # get single point estimates for the dot plot cloud
+        # get the estimates for each coefficient set for just the first case
+        # 
         likelihoods_cloud <- MOS_mlogitsimev(sc_cf_cases(), 
                                              coeff_estimates, 
                                              ci = c(0.95, 0.50),
-                                             return_cloud = TRUE)
+                                             return_first_case_likelihoods = 
+                                                 TRUE)
         
         # format the single point estimates for visualization
         likelihoods_cloud <- data.frame(likelihoods_cloud)
@@ -316,9 +321,8 @@ shinyServer(function(input, output, session) {
                         x_lab = isolate(input$x_axis_choice),
                         custom_colors = custom_outcome_colors,
                         isolate(
-                            variable_configuration[[x_axis_var]]$annotation),
-                        isolate(
-                            variable_configuration[[x_axis_var]]$annotation1)
+                            variable_configuration[[x_axis_var]]$
+                                custom_x_axis_ticks)
         )
     })
     
