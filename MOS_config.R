@@ -196,7 +196,7 @@ variable_configuration <- list(
                                      "parent--agent relationship and ",
                                      "Reunification: the likelihood that ",
                                      "simulated cases end in Reunification ",
-                                     "slightly increases as the relationshp ",
+                                     "slightly increases as the relationship ",
                                      "index increases.<br><br>The likelihood ",
                                      "of Adoption declines as the ",
                                      "relationship index increases. The ",
@@ -257,7 +257,7 @@ variable_configuration <- list(
                                      "increases as the buy-in index increases.",
                                      "<br><br>The likelihood of Guardianship ",
                                      "decreases as the buy-in index ",
-                                     "increases.The likelihood of Adoption ",
+                                     "increases. The likelihood of Adoption ",
                                      "(moderately likely) and Emancipation ",
                                      "(very unlikely) remain stable."),
         custom_x_axis_ticks = c("very low", "low", 
@@ -412,8 +412,11 @@ custom_css = "bootstrap.css"
 ribbon_addendum <-
     paste0("<br><strong>Please Keep In Mind</strong>",
            
-           "<br>Our simulation cannot tell if the observed relationships are ",
-           "causal or correlational.",
+           "<br>Our simulation does not test whether the observed ",
+           "relationships between the predictor variables and the outcomes ",
+           "are causal. The reader is advised to treat these as useful ",
+           "associations and to be cautious about inferring cause/effect ",
+           "relationships.",
            
            "<br><br><strong>What Is This Simulation Based On?</strong>",
            

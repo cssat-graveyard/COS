@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/25/2015
-# Date updated: 5/20/2015
+# Date updated: 5/22/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -653,14 +653,18 @@ get_ribbon_plot <- function(formatted_likelihoods,
     # if a facet variable is set, add the facet layer to the plot object
     if(!is.null(facet_selected)) {
         plot_object <- plot_object + 
-            facet_wrap(~ facet, ncol = 3)
+            facet_wrap(~ facet, ncol = 3) +
+            theme(panel.margin = unit(1, "lines"),
+                  strip.text.x = element_text(size = 8)
+                  )
         # if custom x-axis ticks are provided, also want to tweak the x-axis
         # tick text and orientation to minimize collisions/overlap between
         # facets
         if(!is.null(custom_x_axis_ticks)) {
             plot_object <- plot_object +
-                theme(axis.text.x = element_text(size = 8, angle = 90),
-                      panel.margin = unit(1, "lines"))
+                theme(axis.text.x = element_text(size = 8, angle = 90, 
+                                                 hjust = 1, vjust = 0.5)
+                      )
         }
     }
     

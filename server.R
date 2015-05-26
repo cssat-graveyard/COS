@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/23/2015
-# Date updated: 5/20/2015
+# Date updated: 5/26/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -210,10 +210,10 @@ shinyServer(function(input, output, session) {
         #       2. a new x-axis is selected (refreshes the plots that use
         #          explore_cf_cases() and resets the sliders if they are 
         #          visible)
-        # because "input$slider_show" is not isolated, we also get the desired
+        # because "input$show_inputs" is not isolated, we also get the desired
         # behavior that the data is restored to its default state if the
         # "Advanced Options" box is unticked
-        if(input$slider_show & input$update_explore_cf_cases > 0) {
+        if(input$show_inputs & input$update_explore_cf_cases > 0) {
             # note that the update_target here is allowed to be reactive
             # to create a reactive link when the sliders are visible
             apply_input_values(update_target = base_cf_cases(), 
@@ -332,7 +332,7 @@ shinyServer(function(input, output, session) {
                              variable_configuration,
                              # if "Advanced Options" selected, we want to drop
                              # the plot summary
-                             include_plot_summary = !input$slider_show)
+                             include_plot_summary = !input$show_inputs)
         
     })
     
