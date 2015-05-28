@@ -49,10 +49,11 @@
 ###############################################################################
 ## Load Supporting Packages and Scripts
 
-library(dplyr)      # serves various formatting needs
-library(shinyBS)    # expands base Shiny features (e.g., popovers)
-library(Cairo)      # supports plot quality across devices
-library(ggplot2)    # for specifying cos theme
+library(shinythemes) # if want to use one of the basic bootswatch themes
+library(dplyr)       # serves various formatting needs
+library(shinyBS)     # expands base Shiny features (e.g., popovers)
+library(Cairo)       # supports plot quality across devices
+library(ggplot2)     # for specifying cos theme
 
 # insure that Shiny makes use of Cairo
 options(shiny.usecairo=T)
@@ -108,7 +109,7 @@ shinyUI(navbarPage(
     MOS_instance_name,
     
     # set custom bootstrap.css if desired/available
-    theme = custom_css,
+     theme = custom_css,
     
     # using MOS to explore trends per predictor ("Explore Mode")
     tabPanel("Explore Mode", fluidPage(
@@ -154,7 +155,20 @@ shinyUI(navbarPage(
                
                wellPanel(
                    uiOutput("ribbon_text"),
-                   HTML(ribbon_addendum)
+                   HTML(ribbon_addendum),
+                   br(),
+                   br(),
+                   
+                   strong(
+                       actionLink("more_info_modal_link",
+                                  more_info_link_text)
+                   ),
+                   
+                   bsModal("more_info_modal",
+                           more_info_title,
+                           "more_info_modal_link",
+                           HTML(more_info_body),
+                           size = "large")
                )
         )
     )),

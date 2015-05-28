@@ -1,0 +1,624 @@
+---
+title: "Parent Survey Reunification Analysis Redux"
+output:
+  html_document:
+    theme: cerulean
+    toc: yes
+  pdf_document:
+    toc: yes
+  word_document: default
+---
+
+```{r preliminary, include=FALSE}
+
+#load the RODBC library
+library(RODBC)
+#loan nnet for multinom function 
+library(nnet)
+#make pretty tables
+# library(pander)
+#load lubridate to handle dates
+library(lubridate)
+#load psych to calc factor scores
+library(psych)
+```
+# Overview
+
+Our overall goal in this analysis is to examine the timing of permanency outcomes for the children of parents who were surveyed in a comprehensive survey of child-welfare involved parents in Washington State in 2008. Although the survey addressed parents who were served in-home and out-of-home, the analyses here will be limited to those parents who had at least one child placed in out-of-home care. This steps taken here will build toward a competing-risk event-history model.  
+
+# Getting the Data
+
+## Accessing the Original Survey Data
+
+In order to solve a gap in institutional knowledge concerning the precise exclusion criteria used by prior POC staff, all available data files from the original SACWIS matches were exported to the POC2 SQL Server. The source files are in SPSS format and were exported using the SPSS database export utility over an ODBC connection. The source files are available to authorized POC analysts at the following path: 
+
+`\\poc2\Practice Model\PARENT SURVEY I\Reunification Analysis_Parent Survey\Original Data Files\Matt`
+
+All files with at least a `dcid` (parent id for the survey) and a `Person ID` (child id from SACWIS) were imported to the SQL server in `dbCoreAdministrativeTables` in a schema names `survey`. These files were then unioned into a single table `ps_tbl_children` using the following SQL script: 
+
+
+        if object_id('dbo.ps_tbl_children') is not null 
+          drop table dbo.ps_tbl_children
+        
+        select
+          dcid
+          ,id_prsn_child
+          ,min(placement_date) placement_date 
+        into dbo.ps_tbl_children 
+        from(
+          select 
+        		dcid
+        		,person_id id_prsn_child
+        		,placement_date
+        	from 
+        		dbo.ps_open_matt_match_back
+        	union
+        	select 
+        		dcid
+        		,id_prsn id_prsn_child
+        		,coalesce(placement_date, place_start) placement_date
+        	from 
+        		dbo.ps_open_mtt_match_back_famlink_missed_36			
+        	union
+        	select 
+        		study_id dcid
+        		,person_id id_prsn_child
+        		,placement_date
+        	from 
+        		dbo.ps_Original_Openwithplacements_BA_added	
+        	union
+        	select 
+        		dcid
+        		,id_prsn id_prsn_child
+        		,place_start placement_date
+        	from 
+        		dbo.ps_still_open_match_back_from_famlink) tmp
+        group by 
+        	dcid
+        	,id_prsn_child
+        ) tmp
+
+
+This provides us with a cross-walk between the `dcid` and `Person ID` (hereafter `id_prsn_child`) for further use in our analysis.
+
+We next load the data from the parent survey itself. These data are available in another SPSS file located at the following path:  
+
+`\\poc2\Practice Model\PARENT SURVEY I\Parent Data\Original Data\POC FINAL DATA.sav`
+
+As with the files described above, we export the data from SPSS to SQL Server on POC2 using the SPSS database utility. The data are stored in a table named `ps_tbl_parent_data`. We can join the two tables together using a SQL script. Here, however, we will do this directly in R using the `RODBC` package.
+
+```{r select_overall, tidy=FALSE, cache=TRUE}
+#assign a connection object
+cn <- odbcConnect("POC")
+
+
+#use the connection object to send a query to our database
+dat1 <- sqlQuery(cn, 
+                "select 
+                  *
+                  ,id_prsn_child
+                from ps_tbl_parent_data tpd
+                	join ps_tbl_children tc
+                	on tpd.dcid=tc.dcid")
+
+county_xwalk <- 
+
+#count the number of parents
+dat1_par <- length(unique(dat1$DCID))
+dat1_par
+
+#count the number of children
+dat1_chi <- length(unique(dat1$id_prsn_child))
+dat1_chi
+```
+
+We can see from the above counts that the numbers are somewhat less than what are reported in other [POC documents](https://docs.google.com/viewer?url=http%3A%2F%2Fpartnersforourchildren.org%2Fsites%2Fdefault%2Ffiles%2Fpublications%2F2009._part_iv_baseline_parent_survey_analysis.pdf). Specifically, the link in the previous sentence shows a report in which POC reports to have completed surveys for 464 out-of-home cases. While this is true, only `r dat1_par` of these cases were able to be linked to an actual out-of-home placement using the original methodology. 
+
+## Linking data to an actual removal record
+
+The original methodology involved manually linking some survey records to placement dates in the SACWIS. While this may increase the overall number of linkages, it decreases replicability when the linking method cannot be scripted. Furthermore, as we are interested in possibily examining time-varying covariates (e.g. engagement), it is important that we have a clear linking strategy to ensure that we are only examining survey responses of parents who had a child in out-of-home care at the time of their interview.  
+
+As such, we re-link the `id_prsn_child` fields from the `r dat1_par` records using the code shown below. In this code, we first write a common table expression to select the first `id_removal_episode_fact` within the 365 days preceding the parent's interview. We then use this id to select a complete set of records including all parent survey data (`ps_tbl_parent_data`) and all data from the `rptPlacements` base working table.
+
+
+```{r select_reasonable_matches, tidy=FALSE, cache=TRUE}
+dat2 <- sqlQuery(cn, 
+                "with child_rem_id (dcid, id_prsn_child, id_removal_episode_fact) 
+                as
+                (
+                select
+                  tpd.dcid
+                  ,tc.id_prsn_child
+                  ,min(id_removal_episode_fact) id_removal_episode_fact
+                from 
+                	dbo.ps_tbl_parent_data tpd
+                		join dbo.ps_tbl_children tc
+                			on tpd.dcid=tc.dcid
+        						join vw_episodes vep
+        							on vep.eps_begin <= tpd.intdate 
+        								and vep.eps_begin >= dateadd(dd, -365, tpd.intdate)
+                        				and vep.id_prsn_child=tc.id_prsn_child
+                        group by 
+                        	tpd.dcid
+                        	,tc.id_prsn_child
+                        )
+                        select distinct
+        					cri.id_prsn_child
+                        	,cri.id_removal_episode_fact 
+        					--check for records of dependency from AOC data
+        					--for any dependency date that takes place after permanency, set date to null
+        					,case 
+        						when datediff(dd
+                                  ,isnull(vep.petition_dependency_date
+                                          ,vep.eps_begin)
+                                  ,isnull(vep.earlier_of_eps_end_18th_bday
+                                          ,'2013-12-31')) < 0
+        						then null
+        						else vep.petition_dependency_date
+        					end dep_date
+        					--calculate the timing of court involvement 
+        					,case 
+        						--check for petitions before removal and set time to 0
+        						when 
+        							datediff(dd
+                              ,vep.eps_begin
+                              ,isnull(vep.petition_dependency_date
+                                      ,vep.eps_begin)) < 0 
+        						then 
+        							0
+        						--treat missing dependency dates (from logic above) with dur_days 
+                    --greater than 365 as immediate dependencies
+        						when 
+        							case 
+        							
+        								when datediff(dd
+                                      ,isnull(vep.petition_dependency_date
+                                              ,vep.eps_begin)
+                                      ,isnull(vep.earlier_of_eps_end_18th_bday
+                                              ,'2013-12-31')) < 0
+        								then null
+        								else vep.petition_dependency_date
+        							end is null 
+        							and 
+        							dur_days > 365
+        						then 
+        							0
+        						--treat missing dependency dates with dur_days less than 365 as VPA cases
+        						when 
+        							case 	
+        								when datediff(dd
+                                      ,isnull(vep.petition_dependency_date
+                                              ,vep.eps_begin)
+                                      ,isnull(vep.earlier_of_eps_end_18th_bday
+                                              ,'2013-12-31')) < 0
+        								then null
+        								else vep.petition_dependency_date
+        							end is null 
+        						then 
+        							dur_days
+        						--check for petitions after permanency and set time to episode duration
+        						when
+        							datediff(dd
+                                ,vep.petition_dependency_date
+                                ,isnull(vep.earlier_of_eps_end_18th_bday
+                                        ,'2013-12-31')) < 0
+        						then 
+        							dur_days
+        						--for all other cases just calculate the time from 
+                    --eps_begin to the AOC petition 
+        						else 
+        							datediff(dd
+                              ,vep.eps_begin
+                              ,isnull(vep.petition_dependency_date
+                                      ,vep.eps_begin))
+        					end crt_t
+        					,case 
+        						--check for petitions before removal and flag as court involvement
+        						when 
+        							datediff(dd
+                              ,vep.eps_begin
+                              ,isnull(vep.petition_dependency_date
+                                      ,vep.eps_begin)) < 0 
+        						then 
+        							1
+        						--treat missing dependency dates (from logic above) with 
+                    --dur_days greater than 365 as immediate dependencies
+        						when 
+        							case 
+        								when datediff(dd
+                                      ,isnull(vep.petition_dependency_date
+                                              ,vep.eps_begin)
+                                      ,isnull(vep.earlier_of_eps_end_18th_bday
+                                              ,'2013-12-31')) < 0
+        								then null
+        								else vep.petition_dependency_date
+        							end is null 
+        							and 
+        							dur_days > 365
+        						then 
+        							1
+        						--treat missing dependency dates with dur_days less than 365 as VPA cases
+        						when 
+        							case 
+        								when datediff(dd
+                                      ,vep.petition_dependency_date
+                                      ,isnull(vep.earlier_of_eps_end_18th_bday
+                                              ,'2013-12-31')) < 0
+        								then null
+        								else vep.petition_dependency_date
+        							end is null 
+        						then 
+        							0
+        						--check for petitions after permanency and set time to episode duration
+                    --(effectively VPAs)
+        						when
+        							datediff(dd
+                              ,vep.petition_dependency_date
+                              ,isnull(vep.earlier_of_eps_end_18th_bday
+                                      ,'2013-12-31')) < 0
+        						then 
+        							0
+        						--for all other cases just calculate the time from eps_begin to the 
+                    --AOC or CA petition 
+        						else 
+        							1
+        					end crt_s
+        					,dur_days reu_t
+        					,case
+        						when outcome = 'Reunification' then 1 else 0
+        					end reu_s
+        					,dur_days adt_t
+        					,case
+        						when outcome = 'Adoption' then 1 else 0
+        					end adt_s
+        					,dur_days gdn_t
+        					,case
+        						when outcome = 'Guardianship' then 1 else 0
+        					end gdn_s
+  						    ,datediff(dd, vep.eps_begin, tpd.intdate) time_to_int
+        					,tpd.* 
+                  ,vep.*
+                        from
+                        	dbo.ps_tbl_parent_data tpd
+                        		join child_rem_id cri
+                        			on tpd.dcid=cri.dcid
+        						join vw_episodes vep
+        							on vep.id_removal_episode_fact = cri.id_removal_episode_fact
+        				order by vep.id_removal_episode_fact")
+
+#count the number of parents
+dat2_par <- length(unique(dat2$DCID))
+dat2_par
+
+#count the number of children
+dat2_chi <- length(unique(dat2$id_prsn_child))
+dat2_chi
+```
+
+As can be seen, we are left with `r dat2_par`  parents and `r dat2_chi`  children. To be clear, there are other `id_removal_episode_fact` matches for the original matches of children. However, the removal episodes for these children are either over 1 year before the interview date or after the interview date. We are thus left with administrative data matches for approximately `r 100*round(dat2_par/dat1_par, 2)` percent of the surveyed families who were identified as out-of-home care cases. 
+
+# Excluding Subjects by Case Characteristics
+
+The child welfare system in Washington engages families in a heterogeneous manner. One of the major distinctions between out-of-home care cases is the extent to which children are engaged by the court system. Some children enter out-of-home (OOH) care by way of a voluntary placement agreement (VPA), some children enter OOH care by way of a court order, and some begin their stay in OOH in a VPA and then transition to placement under a court order. Identifying these children is important as the path they take through the system significantly impacts their probability of exiting the system at any given time. In our initial match of survey data above, we created a new variable called `crt_s` which indicated the extent to which a child had any court involvement in their dependency^1^. 
+
+```{r count_court_cases, results='asis', cache=TRUE, echo=FALSE}
+pander(table(factor(dat2$crt_s,levels=c(0,1),labels=c("No Court", "Court")), dnn="Count"))
+```
+
+As can be seen there are 53 children who had no court involvement in their case. While event history models are flexible enough to include children who started in a VPA "state" and then transitions to either court involvement or some form of permanency, the relatively small number of children starting in this state will not likely yield meaningful results. Including them in our analysis may, however, bias the results of our analysis of court-involved children. As such, these children will be excluded from our analysis. 
+
+Our study also includes a small number of children who, at the time of our last observation, had experienced either no permanency outcome or had experienced an outcome classified as "other". 
+
+```{r count_odd_outcomes, results='asis', echo=FALSE, cache=TRUE}
+pander(table(dat2$outcome, dnn="Count"), split.table = Inf)
+```
+
+While event history methods certainly provide for the ability to handle such observations (mainly through identifying the children as right-censored), we are specifically interested in using the current analysis to engage in predictive modeling. As standard event history methods have limited ability to predict outcomes, we further restrict our data to children who have exited to permanency by the end of 2013 and who had court involvement in their placement. This creates a relatively heterogenous group of children for our analysis and, since we actually observe a permanency outcome for all of the children, we needn't bother with event history methods in our analysis.  
+
+```{r final_data_subset}
+dat3 <- subset(dat2, !(dat2$outcome %in% c("Still in Care", "Other")) & dat2$crt_s == 1)
+#count the number of parents
+dat3_par <- length(unique(dat3$DCID))
+dat3_par
+
+#count the number of children
+dat3_chi <- length(unique(dat3$id_prsn_child))
+dat3_chi
+```
+
+The resulting sample includes `r dat3_par`  parents and `r dat3_chi`  children.
+
+# Define Variables for Cross Validation Procedure
+
+```{r select_covariates}
+
+#define factor based outcome with reunification as reference category 
+dat3$outcome <- as.factor(as.character(dat3$outcome)) 
+levels(dat3$outcome) <- c("Adoption", "Emancipation", "Guardianship", "Reunification")
+dat3$outcome <- relevel(dat3$outcome, ref = "Reunification")
+
+#prep covariates
+#log transform age at episode begin
+dat3$log_age_eps_begin <- log1p(dat3$age_eps_begin)
+#flag for adolescent child
+dat3$ad_chld <- ifelse(dat3$age_eps_begin > 11, 1, 0)  
+#flag for toddler
+dat3$sm_chld <- ifelse(dat3$age_eps_begin <= 3, 1, 0) 
+#flag for white
+dat3$non_min <- ifelse(dat3$cd_race_census == 5, 1, 0)
+#flag for male
+dat3$male <- ifelse(dat3$cd_gndr == "M", 1, 0)
+#flag for parent age
+dat3$par_age <- year(strptime(dat3$eps_begin, format = "%Y-%m-%d"))-year(strptime(dat3$DOB, format = "%Y-%m-%d"))
+#flag for log transformed parent age
+dat3$log_par_age <- log(dat3$par_age)
+#flag for marriage status
+dat3$married <- ifelse(dat3$MARSTAT < 1, NA, ifelse(dat3$MARSTAT == 2, 1, 0))
+#count of Number of biological or adopted children
+dat3$hhnum_c <- ifelse(dat3$CHTOTNUM < 1, NA, dat3$CHTOTNUM)
+#flag for longest placement in relative setting 
+dat3$rel_plc <- ifelse(as.numeric(dat3$longest_plcm_setng)==3,1,0)
+#sequence of placement episode
+dat3$eps_rank <- dat3$eps_rank
+#log transform of sequence of placement episode
+dat3$log_eps_rank <- log(dat3$eps_rank)
+#total housing hardship count 
+dat3$housing_hs_cnt <- ifelse(is.na(dat3$LACRENT) == TRUE | dat3$LACRENT == 2, 0, 1) +
+                        ifelse(is.na(dat3$EVICT) == TRUE | dat3$EVICT == 2, 0, 1) + 
+                        ifelse(is.na(dat3$FAMFRND) == TRUE | dat3$FAMFRND == 2, 0, 1) + 
+                        ifelse(is.na(dat3$REPOSS) == TRUE | dat3$REPOSS == 2, 0, 1) + 
+                        ifelse(is.na(dat3$HOMLSS) == TRUE | dat3$HOMLSS == 2, 0, 1) 
+#flag for housing hardship
+dat3$hsg_hds <- ifelse(dat3$housing_hs_cnt > 0, 1, 0)
+#flag for income over 10,000K
+dat3$high_in <- ifelse(dat3$THHINC < 1, NA, ifelse(dat3$THHINC > 1, 1, 0))
+#flag for more than high school
+dat3$sm_coll <- ifelse(dat3$EDULVL < 1, NA, ifelse(dat3$EDULVL > 3, 1, 0))
+#flag for full or part time employment 
+dat3$employ <- ifelse(dat3$EMPSTAT < 1, NA, ifelse(dat3$EMPSTAT != 1, 1, 0))
+
+
+#engagement recoding 
+
+#first step is to recode responses to likert or NA only (dont know or refuse are all NA)
+
+#receptivity
+dat3$y2 = ifelse(dat3$YENG2 < 1, NA, dat3$YENG2)
+dat3$y3 = ifelse(dat3$YENG3 < 1, NA, dat3$YENG3)
+dat3$y7 = ifelse(dat3$YENG7 < 1, NA, dat3$YENG7)
+dat3$y15 = ifelse(dat3$YENG15 < 1, NA, dat3$YENG15)
+
+#working relationship
+dat3$y5 = ifelse(dat3$YENG5 < 1, NA, dat3$YENG5)
+dat3$y9 = ifelse(dat3$YENG9 < 1, NA, dat3$YENG9)
+dat3$y11 = ifelse(dat3$YENG11 < 1, NA, dat3$YENG11)
+dat3$y16 = ifelse(dat3$YENG16 < 1, NA, dat3$YENG16)
+
+#mistrust 
+dat3$y6 = ifelse(dat3$YENG6 < 1, NA, dat3$YENG6)
+dat3$y12 = ifelse(dat3$YENG12 < 1, NA, dat3$YENG12)
+dat3$y18 = ifelse(dat3$YENG18 < 1, NA, dat3$YENG18)
+
+#buyin  
+dat3$y1 = ifelse(dat3$YENG1 < 1, NA, dat3$YENG1)
+dat3$y4 = ifelse(dat3$YENG4 < 1, NA, dat3$YENG4)
+dat3$y8 = ifelse(dat3$YENG8 < 1, NA, dat3$YENG8)
+dat3$y10 = ifelse(dat3$YENG10 < 1, NA, dat3$YENG10)
+dat3$y13 = ifelse(dat3$YENG13 < 1, NA, dat3$YENG13)
+dat3$y14 = ifelse(dat3$YENG14 < 1, NA, dat3$YENG14)
+dat3$y17 = ifelse(dat3$YENG17 < 1, NA, dat3$YENG17)
+dat3$y19 = ifelse(dat3$YENG19 < 1, NA, dat3$YENG19)
+
+#next step is to calculate factor scores on the basis of the hypothetical factor structure of Yatchmenoff, 2005
+#note that indices are hard coded. if columns are added prior to this beyond those already coded, we will need to update the column indices accordingly
+#calculate factor scores
+
+dat_recep <- dat3[,c(345:348)]
+dat_recep_scores <- fa.poly(dat_recep)
+dat3$recep_scores <- as.numeric(dat_recep_scores$scores$scores)
+
+dat_wrkg <- dat3[,c(349:352)]
+dat_wrkg_scores <- fa.poly(dat_wrkg)
+dat3$wrkg_scores <- as.numeric(dat_wrkg_scores$scores$scores)
+
+dat_mist <- dat3[,c(353:355)]
+dat_mist_scores <- fa.poly(dat_mist)
+dat3$mist_scores <- as.numeric(dat_mist_scores$scores$scores)
+
+dat_buyn <- dat3[,c(356:363)]
+dat_buyn_scores <- fa.poly(dat_buyn)
+dat3$buyn_scores <- as.numeric(dat_buyn_scores$scores$scores)
+
+#next step is to make centered transformations of all of the engagement items. Again, note the index problem...
+#transform our variables
+#linear
+library(stringr)
+var_tx_lin <- dat3[,c(345:363)] - 3
+nam <- names(var_tx_lin)
+names(var_tx_lin) <- str_c(nam, '_lin')
+#signed square transform
+var_tx_sgnsq <- sign(var_tx_lin) * abs(var_tx_lin)^2
+names(var_tx_sgnsq) <- str_c(nam, '_signsq')
+#signed square root transform
+var_tx_sgnsqrt <- sign(var_tx_lin) * sqrt(abs(var_tx_lin))
+names(var_tx_sgnsqrt) <- str_c(nam, '_signsqrt')
+#ternary transform
+var_tx_tern <- lapply(dat3[,c(345:363)]
+                      ,function(x) as.numeric(as.character(cut(x
+                                       ,breaks = c(0,2,3,5)
+                                       ,labels=c(-1,0,1)
+                                       )))
+                      )
+var_tx_tern <- as.data.frame(var_tx_tern)
+names(var_tx_tern) <- str_c(nam, '_tern')
+
+#code each variable as a factor as well 
+#receptivity
+dat3$y2_fac = as.factor(ifelse(dat3$YENG2 < 1, NA, dat3$YENG2))
+dat3$y3_fac = as.factor(ifelse(dat3$YENG3 < 1, NA, dat3$YENG3))
+dat3$y7_fac = as.factor(ifelse(dat3$YENG7 < 1, NA, dat3$YENG7))
+dat3$y15_fac = as.factor(ifelse(dat3$YENG15 < 1, NA, dat3$YENG15))
+
+#working relationship
+dat3$y5_fac = as.factor(ifelse(dat3$YENG5 < 1, NA, dat3$YENG5))
+dat3$y9_fac = as.factor(ifelse(dat3$YENG9 < 1, NA, dat3$YENG9))
+dat3$y11_fac = as.factor(ifelse(dat3$YENG11 < 1, NA, dat3$YENG11))
+dat3$y16_fac = as.factor(ifelse(dat3$YENG16 < 1, NA, dat3$YENG16))
+
+#mistrust 
+dat3$y6_fac = as.factor(ifelse(dat3$YENG6 < 1, NA, dat3$YENG6))
+dat3$y12_fac = as.factor(ifelse(dat3$YENG12 < 1, NA, dat3$YENG12))
+dat3$y19_fac = as.factor(ifelse(dat3$YENG19 < 1, NA, dat3$YENG19))
+
+#buyin 
+dat3$y1_fac = as.factor(ifelse(dat3$YENG1 < 1, NA, dat3$YENG1))
+dat3$y4_fac = as.factor(ifelse(dat3$YENG4 < 1, NA, dat3$YENG4))
+dat3$y8_fac = as.factor(ifelse(dat3$YENG8 < 1, NA, dat3$YENG8))
+dat3$y10_fac = as.factor(ifelse(dat3$YENG10 < 1, NA, dat3$YENG10))
+dat3$y13_fac = as.factor(ifelse(dat3$YENG13 < 1, NA, dat3$YENG13))
+dat3$y14_fac = as.factor(ifelse(dat3$YENG14 < 1, NA, dat3$YENG14))
+dat3$y17_fac = as.factor(ifelse(dat3$YENG17 < 1, NA, dat3$YENG17))
+dat3$y19_fac = as.factor(ifelse(dat3$YENG19 < 1, NA, dat3$YENG19))
+
+#relevel county 
+dat3$REG <- relevel(as.factor(dat3$REG), ref = "4")
+
+
+#some additional vars
+#dat3$los_at_int <- as.numeric(difftime(dat3$INTDATE, dat3$eps_begin, units = "days"))
+
+#some additional vars
+#dat3$los <- as.numeric(difftime(dat3$eps_end, dat3$eps_begin, units = "days"))
+
+#here we subset our data to the chosen covariates in the model
+
+dat4 <- dat3[,c("outcome"
+             ,"mist_scores"
+             ,"wrkg_scores"
+             ,"recep_scores"
+             ,"buyn_scores"
+             ,"log_age_eps_begin"
+             ,"non_min"
+             ,"male"
+             ,"log_par_age"
+             ,"married"
+             ,"hhnum_c"
+             ,"rel_plc"
+             ,"log_eps_rank"
+             ,"housing_hs_cnt"
+             ,"high_in"
+             ,"sm_coll"
+             ,"employ"
+             ,"REG"
+             )]
+
+dat4$non_min <- as.factor(dat4$non_min)
+dat4$male <- as.factor(dat4$male)
+dat4$married <- as.factor(dat4$married)
+dat4$rel_plc <- as.factor(dat4$rel_plc)
+dat4$high_in <- as.factor(dat4$high_in)
+dat4$sm_coll <- as.factor(dat4$sm_coll)
+dat4$employ <- as.factor(dat4$employ)
+
+levels(dat4$non_min) <- c("Minority Child"
+                          ,"White or Caucasian Child")
+
+levels(dat4$male) <- c("Female Child"
+                       ,"Male Child")
+
+levels(dat4$married) <- c("Child Parents are Not Married"
+                          ,"Child Parents are Married")
+
+levels(dat4$rel_plc) <- c("Longest Placement in a non-Relative Setting"
+                          ,"Longest Placement in a Relative Setting")
+
+levels(dat4$high_in) <- c("Annual Income Less than or Equal to $10,000"
+                          ,"Annual Income More than $10,000")
+
+levels(dat4$sm_coll) <- c("High School or Below"
+                          ,"More than High School")
+
+levels(dat4$employ) <- c("Full or Part Time Employment"
+                         ,"Unemployed")
+
+levels(dat4$REG) <- c("Region 2 South"
+                      ,"Region 1 North"
+                      ,"Region 1 South"
+                      ,"Region 3 South"
+                      ,"Region 3 North"
+                      ,"Region 2 North")
+
+#assign dat4 to data object for sim-tool app
+data <- dat4
+
+# run the multinomial model
+model <- multinom(outcome ~ mist_scores + wrkg_scores + recep_scores + 
+                  buyn_scores + log_age_eps_begin + non_min + male + log_par_age  + 
+                    married + hhnum_c + rel_plc + log_eps_rank + housing_hs_cnt + 
+                    high_in + sm_coll + employ + REG  + 
+                    high_in*housing_hs_cnt  + 
+                    housing_hs_cnt*employ
+                 ,data = data
+                 ,Hess = TRUE)
+
+#save objects for sim-tool
+save(data, model, file = "/Users/mienkoja/Dropbox/repos/sim-tool/data_model.RData")
+
+
+data_dictionary <- list()
+
+data_dictionary$outcome$label <- "Permanency Outcome"
+data_dictionary$outcome$definition <- "One of four permanency outcomes: Reunification, Adoption, Guardianship, or Emancipation."
+
+data_dictionary$mist_scores$label <- "Engagement: Mistrust"
+data_dictionary$mist_scores$definition <- "A parent's belief that the agency or worker is manipulative, malicious, or capricious, with intent to harm the client."
+
+data_dictionary$mist_scores$label <- "Engagement: Working Relationship"
+data_dictionary$mist_scores$definition <- "A parent's perception of the interpersonal relationship with worker characterized by a sense of reciprocity or mutuality and good communication."
+
+data_dictionary$recep_scores$label <- "Engagement: Receptivity"
+data_dictionary$recep_scores$definition <- "A parent's openness to receiving help, characterized by recognition of problems or circumstances that resulted in agency intervention and by a perceived need for help"
+
+data_dictionary$buyn_scores$label <- "Engagement: Buy-In"
+data_dictionary$buyn_scores$definition <- "A parent's perception of benefit; a sense of being helped or the expectation ofreceiving help through the agency’s involvement; a feeling that things are changing (or will change) for the better. Also includes a commitment to the helping process, characterized by active participation in planning or services, goal ownership, and initiative in seeking and using help."
+
+data_dictionary$log_age_eps_begin$label <- "Age at Episode Begin"
+data_dictionary$log_age_eps_begin$definition <- "The age of the child (in years) as of the start of their placement in out-of-home care"
+
+data_dictionary$non_min$label <- "Non-Minority"
+data_dictionary$non_min$definition <- "A indicator of whether the child is identified as some race other than White/Caucasian"
+
+data_dictionary$male$label <- "Gender"
+data_dictionary$male$definition <- "The gender of the child."
+
+data_dictionary$log_par_age$label <- "Age of Parent at Episode Begin"
+data_dictionary$log_par_age$definition <- "The age of the parent (in years) as of the start of their child(ren)'s  placement in out-of-home care"
+
+data_dictionary$log_par_age$label <- "Parental Marital Status"
+data_dictionary$log_par_age$definition <- "An indicator as to whether or not the parent claimed to be married at the point of interview."
+
+data_dictionary$hhnum_c$label <- "Number of Children in the Household"
+data_dictionary$hhnum_c$definition <- "The simple count of children in the household as reported by the parent at the point of survey."
+
+data_dictionary$rel_plc$label <- "Longest Placement with a Relative"
+data_dictionary$rel_plc$definition <- "An indicator as to whether or not the child spent the most time in out-of-home care in a relative placement."
+
+data_dictionary$log_eps_rank$label <- "Number of Prior Placements"
+data_dictionary$log_eps_rank$definition <- "The count of prior placements experienced by a child, as reported in administrative data."
+
+data_dictionary$housing_hs_cnt$label <- "Count of Housing Hardships"
+data_dictionary$housing_hs_cnt$definition <- "The count of affirmative responses to survey questions concerning housing hardships (e.g. difficulty paying rent, couch-surfing, etc.)."
+
+data_dictionary$high_in$label <- "Parental Income Status"
+data_dictionary$high_in$definition <- "An indicator as to whether or not the parent's reported income is less than (or equal to) 10,000 dollars."
+
+data_dictionary$sm_coll$label <- "Parental Education Level"
+data_dictionary$sm_coll$definition <- "An indicator as to whether or not the parent reported any education beyond high-school"
+
+data_dictionary$employ$label <- "Parental Employment Status"
+data_dictionary$employ$definition <- "An indicator as to whether or not the parent reported full or part-time employment"
+
+data_dictionary$REG$label <- "Administrative Region"
+data_dictionary$REG$definition <- "An indicator of the administrative region of the parent's child welfare case."
+
+```

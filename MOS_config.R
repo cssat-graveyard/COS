@@ -76,6 +76,20 @@
 # - Dot Cloud Plot Addendum (Optional)
 #   - Same but for the dot cloud plot (dot_cloud_addendum).
 #   - Set this variable to NULL if you don't want to add anything.
+#
+# - More Info Modal (Optional)
+#   - If you want additional information about the plots to be available to
+#     the user but you don't want to clutter up the space beneath the plot
+#     with a lot of text...
+#   - One option is to simply put HTML anchor tags and links into the relevant
+#     addendum.
+#   - However, if you don't want your user to have to leave the application,
+#     you can adjust the features in this section to make a modal link and
+#     window available to the user. The link will appear after the plot
+#     addendum (if there is one).
+#   - Modal details: http://ebailey78.github.io/shinyBS/docs/Modals.html
+#   - Simply set "more_info_link_text" to NULL if you don't want to use the
+#     modal at all.
 
 ###############################################################################
 ## Name the Application Instance
@@ -398,7 +412,7 @@ custom_outcome_colors <- c("#D9BB32", "#6DB33F", "#6E9CAE", "#B1662B",
 
 # Custom bootstrap.css file must be in the www subdirectory of the MOS
 # application. Set "custom_css" to NULL if you don't want to use one.
-custom_css = "bootstrap.css"
+custom_css = "united_bootstrap.css"
 # CSS theme for entire project (current theme from here:
 # https://bootswatch.com/sandstone/)
 
@@ -416,18 +430,7 @@ ribbon_addendum <-
            "relationships between the predictor variables and the outcomes ",
            "are causal. The reader is advised to treat these as useful ",
            "associations and to be cautious about inferring cause/effect ",
-           "relationships.",
-           
-           "<br><br><strong>What Is This Simulation Based On?</strong>",
-           
-           "<br>The simulation is modeled on real data: a survey of child ",
-           "welfare-involved parents performed in 2008 by Partners for Our ",
-           "Children and linked to administrative data from Children's ",
-           "Administration.",
-           
-           "<br><br>The data is of limited scope, it includes only cases ",
-           "where the child was removed with an active dependency petition ",
-           "and entered care in 2008 in Washington State.")
+           "relationships.")
 
 ###############################################################################
 ## Dot Cloud Plot Addendum (Optional)
@@ -465,6 +468,33 @@ dot_cloud_addendum <-
            "<br><br>The data is of limited scope, it includes only cases ",
            "where the child was removed with an active dependency petition ",
            "and entered care in 2008 in Washington State.")
+
+###############################################################################
+## More Info Modal (Optional)
+
+# What should be the text for the user-facing link that can open the more info
+# modal? Plain text string - no HTML formatting (will be formatted to look like 
+# a section title in ui.R). Set to NULL if you don't want to use the more info
+# modal at all.
+more_info_link_text <- "What is the simulation based on?"
+
+# Set the title for the modal window. 
+more_info_title <- "What is the simulation based on?"
+
+# Build the body for the modal window. This can technically be any Shiny R
+# UI objects, but by default should simply be a block of HTML formatted text.
+# You will need to reference and adjust the ui.R and server.R scripts if you 
+# want more complex Shiny R features here.
+more_info_body <- 
+    paste0("The simulation is modeled on real data: a survey of child ",
+           "welfare-involved parents performed in 2008 by Partners for Our ",
+           "Children and linked to administrative data from Children's ",
+           "Administration.",
+           
+           "<br><br>The data is of limited scope, it includes only cases ",
+           "where the child was removed with an active dependency petition ",
+           "and entered care in 2008 in Washington State.")
+
 
 ###############################################################################
 ## END OF SCRIPT
