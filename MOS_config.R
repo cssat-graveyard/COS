@@ -175,9 +175,9 @@ variable_configuration <- list(
     mist_scores = list(
         pretty_name         = "Engagement: Parent Trusts Case Worker",
         definition          = paste0("Parental belief that the agency or ", 
-                                     "worker is sincere, honest, or ",
+                                     "case worker is sincere, honest, or ",
                                      "well-intentioned, with intent to help ",
-                                     "the client."),
+                                     "the parent."),
         ribbon_plot_summary = paste0("There is a positive association between ",
                                      "this index of parental trust and ",
                                      "Reunification: the likelihood that ",
@@ -202,12 +202,13 @@ variable_configuration <- list(
         pretty_name         = paste0("Engagement: Working Relationship ",
                                      "Between Parent and Case Worker"),
         definition          = paste0("Parental perception of the ",
-                                     "interpersonal relationship with worker ",
-                                     "characterized by a sense of reciprocity ",
-                                     "or mutuality and good communication."),
+                                     "interpersonal relationship with case ",
+                                     "worker characterized by a sense of ",
+                                     "reciprocity or mutuality and good ",
+                                     "communication."),
         ribbon_plot_summary = paste0("There is a positive, but weak, ",
                                      "association between this index of the ",
-                                     "parent--agent relationship and ",
+                                     "parent--case worker relationship and ",
                                      "Reunification: the likelihood that ",
                                      "simulated cases end in Reunification ",
                                      "slightly increases as the relationship ",
@@ -441,22 +442,32 @@ ribbon_addendum <-
 # the language to be appropriate for the application instance and audience. Set
 # to NULL if you simply want the this are to be blank.
 dot_cloud_addendum <- 
-    paste0("<strong>What Does This Graph Show Us?</strong>",
+    paste0("<strong>What Does This Tool Do?</strong>",
            
-           "<br>Each time the 'SIMULATE' button is clicked, the child welfare ",
-           "case you described (i.e., the values you set the inputs to) is ",
-           "run through 1000 versions of our case outcome model. These ",
-           "versions vary based on how much uncertainty there is in the model.",
+           "<br>This tool allows you to describe a specific child welfare ",
+           "case and observe how likely each outcome is for simulations based ",
+           "on that case.", 
+
+           "<br><br>You describe the case by setting the inputs to the values ",
+           "that best fit the case.",
+
+           "<br><br>Each time the 'SIMULATE' button is clicked, the child ",
+           "welfare case you described is run through 1000 versions of our ",
+           "case outcome model. These versions vary based on how much ",
+           "uncertainty there is in the model.",
            
-           "<br><br>For each model run, we get an estimate of how likely ",
+           "<br><br>For each model version, we get an estimate of how likely ",
            "the four outcomes are. We plot every estimate by its outcome.",
            
            "<br><br>So, there are 1000 points by each outcome - one for every ",
-           "model run.",
+           "model version.",
            
-           "<br><br>The resulting graph gives us a sense of which outcomes ",
-           "tend to be more likely and how much uncertainty there is in the ",
-           "model.")
+           "<br><br>The resulting plot gives us a sense of how likely the ",
+           "outcomes tend to be across all the model versions (where do the ",
+           "dots tend to cluster for each outcome?) while also suggesting ",
+           "how much confidence we should have in our model's ability to ", 
+           "accurately simulate outcomes for the described case ",
+           "(how spread out are the dots for each outcome?)")
 
 ###############################################################################
 ## More Info Modal (Optional)
