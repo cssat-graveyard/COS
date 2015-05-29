@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/25/2015
-# Date updated: 5/28/2015
+# Date updated: 5/29/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -676,8 +676,8 @@ get_ribbon_plot <- function(formatted_likelihoods,
         # facets
         if(!is.null(custom_x_axis_ticks)) {
             plot_object <- plot_object +
-                theme(axis.text.x = element_text(size = 8, angle = 90, 
-                                                 hjust = 1, vjust = 0.5)
+                theme(axis.text.x = element_text(size = 8, angle = -45, 
+                                                 hjust = 0, vjust = 1)
                       )
         }
     }

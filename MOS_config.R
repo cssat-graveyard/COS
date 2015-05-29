@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 5/12/2015
-# Date updated: 5/28/2015
+# Date updated: 5/29/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -412,7 +412,7 @@ custom_outcome_colors <- c("#D9BB32", "#6DB33F", "#6E9CAE", "#B1662B",
 
 # Custom bootstrap.css file must be in the www subdirectory of the MOS
 # application. Set "custom_css" to NULL if you don't want to use one.
-custom_css = "united_bootstrap.css"
+custom_css = "sandstone_bootstrap.css"
 # CSS theme for entire project (current theme from here:
 # https://bootswatch.com/sandstone/)
 
@@ -456,18 +456,7 @@ dot_cloud_addendum <-
            
            "<br><br>The resulting graph gives us a sense of which outcomes ",
            "tend to be more likely and how much uncertainty there is in the ",
-           "model.",
-           
-           "<br><br><strong>What Is This Simulation Based On?</strong>",
-           
-           "<br>The simulation is modeled on real data: a survey of child ",
-           "welfare-involved parents performed in 2008 by Partners for Our ",
-           "Children and linked to administrative data from Children's ",
-           "Administration.",
-           
-           "<br><br>The data is of limited scope, it includes only cases ",
-           "where the child was removed with an active dependency petition ",
-           "and entered care in 2008 in Washington State.")
+           "model.")
 
 ###############################################################################
 ## More Info Modal (Optional)

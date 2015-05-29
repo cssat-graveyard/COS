@@ -159,6 +159,8 @@ If "packrat" doesn't initialize:
 
 If packrat has installation errors, you'll need to problem shoot or install those packages manually (e.g., ```install.packages()``` from the R console).
 
+Exception: If packrat is failing when it tries to download packages, check out the workaround [here](https://github.com/rstudio/packrat/issues/209).
+
 ### Initalize Shiny Server and Get the Link to Your App
 At this point, it's time to initialize Shiny Server and start looking at your Shiny applications. From the putty console, simply use:
 ```

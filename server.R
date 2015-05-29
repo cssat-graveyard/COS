@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/23/2015
-# Date updated: 5/28/2015
+# Date updated: 5/29/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -95,7 +95,7 @@ shinyServer(function(input, output, session) {
         # filter the variable_configuration dataframe for the row with the
         # matching UI name, extract the column name
         # UNLESS special variable "None" is selected, in which case return NULL
-        if(input$facet_choice == "None") {
+        if(input$facet_choice == "No Comparison Selected") {
             return(NULL)
         } else {
             # explore raw_pretty_pairs to find the correct raw name
