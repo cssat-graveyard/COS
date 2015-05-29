@@ -68,10 +68,21 @@
 
 ###############################################################################
 ## Load Supporting Packages
+#   - devtools and packrat are highly useful to support MOS instances - I
+#     suggest installing, learning, and using these applications
+# install.packages(c("devtools", "packrat"))
+
+#   - To install the batch of packages below, except for simcf:
+# package_names <- c("shiny", "shinyBS", "shinythemes", "Cairo", "nnet",
+#                    "combinat", "MASS", "dplyr", "reshape2", "tidyr",
+#                    "ggplot2", "scales", "grid")
+# install.packages(package_names)
+
 #   - To get simcf (a custom package on github), use the install_github 
 #     function from the devtools package:
-#     install_github("chrisadolph/tile-simcf", subdir = "simcf")
+# devtools::install_github("chrisadolph/tile-simcf", subdir = "simcf")
 
+library(shiny)       # insuring that Shiny is packrat friendly and loaded
 library(shinyBS)     # expands base Shiny features (e.g., popovers)
 library(shinythemes) # allows using basic bootswatch without custom CSS file
 library(Cairo)       # supports improved plot quality across devices

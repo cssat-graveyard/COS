@@ -104,7 +104,7 @@ shinyUI(navbarPage(
     MOS_instance_name,
     
     # set custom bootstrap.css if desired/available
-    theme = shinythemes("united"),
+    theme = shinytheme("united"),
     
     # using MOS to explore trends per predictor ("Explore Mode")
     tabPanel("Explore Mode", fluidPage(
