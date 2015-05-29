@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/23/2015
-# Date updated: 5/26/2015
+# Date updated: 5/28/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -49,17 +49,12 @@
 ###############################################################################
 ## Load Supporting Packages and Scripts
 
-library(shinythemes) # if want to use one of the basic bootswatch themes
-library(dplyr)       # serves various formatting needs
-library(shinyBS)     # expands base Shiny features (e.g., popovers)
-library(Cairo)       # supports plot quality across devices
-library(ggplot2)     # for specifying cos theme
+# all the supporting packages and scripts for this project are defined in a
+# single script for consistency/clarity
+source("MOS_packages_and_custom_functions.R")
 
 # insure that Shiny makes use of Cairo
 options(shiny.usecairo=T)
-
-# load the custom functions built for MOS
-source("MOS_custom_functions.R")
 
 ###############################################################################
 ## Load MOS Configuration Script
@@ -109,7 +104,7 @@ shinyUI(navbarPage(
     MOS_instance_name,
     
     # set custom bootstrap.css if desired/available
-     theme = custom_css,
+    theme = shinythemes("united"),
     
     # using MOS to explore trends per predictor ("Explore Mode")
     tabPanel("Explore Mode", fluidPage(
