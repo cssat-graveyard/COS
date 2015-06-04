@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 5/12/2015
-# Date updated: 5/29/2015
+# Date updated: 6/4/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -179,7 +179,7 @@ variable_configuration <- list(
                                      "well-intentioned, with intent to help ",
                                      "the parent."),
         ribbon_plot_summary = paste0("There is a positive association between ",
-                                     "this index of parental trust and ",
+                                     "the index of parental trust and ",
                                      "Reunification: the likelihood that ",
                                      "simulated cases end in Reunification ",
                                      "increases as the trust index increases.",
@@ -207,7 +207,7 @@ variable_configuration <- list(
                                      "reciprocity or mutuality and good ",
                                      "communication."),
         ribbon_plot_summary = paste0("There is a positive, but weak, ",
-                                     "association between this index of the ",
+                                     "association between the index of the ",
                                      "parent--case worker relationship and ",
                                      "Reunification: the likelihood that ",
                                      "simulated cases end in Reunification ",
@@ -236,12 +236,13 @@ variable_configuration <- list(
                                      "problems or circumstances that resulted ",
                                      "in agency intervention and by a ",
                                      "perceived need for help."),
-        ribbon_plot_summary = paste0("The association between this index of ",
+        ribbon_plot_summary = paste0("The association between the index of ",
                                      "parent receptivity and the case ",
                                      "outcomes is very weak. In other words, ",
-                                     "this index - at least by itself - is ",
-                                     "has little effect on the likelihood of ",
-                                     "simulated case outcomes."),
+                                     "the receptivity index - at least by ",
+                                     "itself - has little association with ",
+                                     "the likelihood of simulated case ",
+                                     "outcomes."),
         custom_x_axis_ticks = c("very low", "low", 
                                 "moderate", 
                                 "high", "very high"),
@@ -265,7 +266,7 @@ variable_configuration <- list(
                                      "services, goal ownership, and ",
                                      "initiative in seeking and using help."),
         ribbon_plot_summary = paste0("There is a positive association between ",
-                                     "this index of parental ",
+                                     "the index of parental ",
                                      "commitment/participation and ",
                                      "Reunification: the likelihood that ",
                                      "simulated cases end in Reunification ",
@@ -324,7 +325,7 @@ variable_configuration <- list(
                                      "hardships (e.g. difficulty paying rent, ",
                                      "couch-surfing, etc.)."),
         ribbon_plot_summary = paste0("There is a strong negative assocation ",
-                                     "between this index of housing hardships ",
+                                     "between the index of housing hardships ",
                                      "and Reunification: the likelihood that ",
                                      "simulated cases end in Reunification ",
                                      "decreases as the housing hardship index ",
@@ -459,9 +460,6 @@ dot_cloud_addendum <-
            "<br><br>For each model version, we get an estimate of how likely ",
            "the four outcomes are. We plot every estimate by its outcome.",
            
-           "<br><br>So, there are 1000 points by each outcome - one for every ",
-           "model version.",
-           
            "<br><br>The resulting plot gives us a sense of how likely the ",
            "outcomes tend to be across all the model versions (where do the ",
            "dots tend to cluster for each outcome?) while also suggesting ",
@@ -493,7 +491,19 @@ more_info_body <-
            
            "<br><br>The data is of limited scope, it includes only cases ",
            "where the child was removed with an active dependency petition ",
-           "and entered care in 2008 in Washington State.")
+           "and entered care in 2008 in Washington State.",
+           
+           "<br><br>For a detailed review of the data sources, the data, and
+           the model, please see the publication by POC below.",
+           
+           "<br><br><strong>Publications</strong>",
+           "<br>PLACEHOLDER FOR KEY POC PUBLICATION.",
+           
+           "<br><br>PLACEHOLDER FOR ANY OTHER KEY PUBLICATIONS.",
+           
+           "<br><br>Yatchmenoff, D.K. (2005). Measuring client engagement from 
+           the client’s perspective in non-voluntary child protective services. 
+           Research on Social Work Practice, 15, 84-96.")
 
 
 ###############################################################################

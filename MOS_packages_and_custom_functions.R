@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/25/2015
-# Date updated: 5/29/2015
+# Date updated: 6/4/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -676,8 +676,8 @@ get_ribbon_plot <- function(formatted_likelihoods,
         # facets
         if(!is.null(custom_x_axis_ticks)) {
             plot_object <- plot_object +
-                theme(axis.text.x = element_text(size = 8, angle = -45, 
-                                                 hjust = 0, vjust = 1)
+                theme(axis.text.x = element_text(size = 8, angle = 45, 
+                                                 hjust = 1, vjust = 1)
                       )
         }
     }
@@ -1184,26 +1184,48 @@ apply_input_values <- function(update_target,
 
 # We need to summarize the key details of each ribbon plot. This builds a text
 # string (with HTML formatting) that can be used for that purpose.
-build_ribbon_summary <- function(x_axis_raw_name, 
+build_ribbon_summary <- function(x_axis_raw_name,
+                                 facet_raw_name,
                                  variable_config_list,
                                  include_plot_summary) {
     
-    # extract the matching config variable
-    target <- variable_config_list[[x_axis_raw_name]]
+    # extract the matching x-axis config variable
+    x_axis_target <- variable_config_list[[x_axis_raw_name]]
+    
+    # if a facet variables has been selected, we exract that config variable
+    # as well
+    if(!is.null(facet_raw_name)) {
+        facet_target <- variable_config_list[[facet_raw_name]]
+    } else {
+        facet_target <- NA
+    }
     
     # combine the relevant variable features to make the summary
+    if(!is.na(facet_target)) {
+        ribbon_defs <- paste0(
+            "<strong>", x_axis_target$pretty_name, "</strong><br>",
+            x_axis_target$definition, "<br><br>",
+            
+            "<strong>", facet_target$pretty_name, "</strong><br>",
+            facet_target$definition, "<br><br>"
+        )
+    } else {
+        ribbon_defs <- paste0(
+            "<strong>", x_axis_target$pretty_name, "</strong><br>",
+            x_axis_target$definition, "<br><br>"
+        )
+    }
+    
     if(include_plot_summary) {
         ribbon_summary <- paste0(
-            "<strong>", target$pretty_name, "</strong><br>",
-            target$definition, "<br><br>",
-            "<strong>Key Trends</strong><br>",
-            target$ribbon_plot_summary
+            ribbon_defs,
+            "<strong>Key Trends for the X-Axis Variable</strong><br>",
+            x_axis_target$ribbon_plot_summary
         )
     } else {
         ribbon_summary <- paste0(
-            "<strong>", target$pretty_name, "</strong><br>",
-            target$definition, "<br><br>",
-            "<strong>Key Trends</strong><br>",
+            ribbon_defs,
+            "<strong>Key Trends for the X-Axis Variable</strong><br>",
             "Not available when using Advanced Options.")
     }
     

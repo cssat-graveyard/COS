@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/23/2015
-# Date updated: 5/29/2015
+# Date updated: 6/4/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -185,6 +185,7 @@ shinyServer(function(input, output, session) {
     # construct the summary text for the ribbon plot ("Explore Mode")
     output$ribbon_text <- renderText({
         build_ribbon_summary(x_axis_raw_name(), 
+                             facet_raw_name(),
                              variable_configuration,
                              # if "Advanced Options" selected, we want to drop
                              # the plot summary
