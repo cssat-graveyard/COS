@@ -31,7 +31,10 @@
 #
 #       Non-functional example code has been provided in each configuration
 #       section. A working example project with code can be observed here:
-#       ##UPDATE NEEDED##
+#       https://github.com/bwaismeyer/MOS_framework/tree/MOS_demo
+#
+#       You can see the example project in action here:
+#       ## UPDATE NEEDED ##
 #
 # SCRIPT OUTLINE:
 # - Name the Application Instance

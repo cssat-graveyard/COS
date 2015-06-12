@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/25/2015
-# Date updated: 6/4/2015
+# Date updated: 6/9/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -424,9 +424,16 @@ MOS_mlogitsimev <- function (x, b, ci = 0.95, constant = 1, z = NULL, g = NULL,
             if (usegamma) {
                 newdenom <- exp(b[, , icat] %*% x[iscen, , icat] + 
                                     g %*% z[iscen, , icat])
-            }
-            else {
+                if(any(is.infinite(newdenom))) {
+                    stop("Getting unreasonable values (e.g., 'infinite') when ",
+                         "trying to simulate data. Your model may be over fit.")
+                }
+            } else {
                 newdenom <- exp(b[, , icat] %*% x[iscen, , icat])
+                if(any(is.infinite(newdenom))) {
+                    stop("Getting unreasonable values (e.g., 'infinite') when ",
+                         "trying to simulate data. Your model may be over fit.")
+                }
             }
             simdenom <- simdenom + newdenom
         }
@@ -436,8 +443,7 @@ MOS_mlogitsimev <- function (x, b, ci = 0.95, constant = 1, z = NULL, g = NULL,
         else {
             simdenom <- simdenom + 1
         }
-        simy <- matrix(NA, nrow = dim(b)[1], ncol = (dim(b)[3] + 
-                                                         1))
+        simy <- matrix(NA, nrow = dim(b)[1], ncol = (dim(b)[3] + 1))
         
         for (icat in 1:dim(x)[3]) {
             if (usegamma) 
@@ -453,7 +459,7 @@ MOS_mlogitsimev <- function (x, b, ci = 0.95, constant = 1, z = NULL, g = NULL,
         
         ## REVISION ##
         # reorder columns so the REFERENCE OUTCOME is now the FIRST column
-        simy <- simy[, c(4, 1:3)]
+        simy <- simy[, c(ncol(simy), 1:(ncol(simy) - 1))]
         
         ## REVISION ##
         # if requested, return the first case likelihoods for each coefficient
@@ -670,7 +676,7 @@ get_ribbon_plot <- function(formatted_likelihoods,
             facet_wrap(~ facet, ncol = 3) +
             theme(panel.margin = unit(1, "lines"),
                   strip.text.x = element_text(size = 8)
-                  )
+            )
         # if custom x-axis ticks are provided, also want to tweak the x-axis
         # tick text and orientation to minimize collisions/overlap between
         # facets
@@ -678,7 +684,7 @@ get_ribbon_plot <- function(formatted_likelihoods,
             plot_object <- plot_object +
                 theme(axis.text.x = element_text(size = 8, angle = 45, 
                                                  hjust = 1, vjust = 1)
-                      )
+                )
         }
     }
     
@@ -965,32 +971,39 @@ make_inputs <- function(variable_config_list,
         }
     }
     
-    # subset variable_config_list to just get the slider candidates
-    # (excluding the x-axis variabe)
-    selected_sliders <- variable_config_list[slider_index]
-    
-    # generate the sliders (and their popovers)
-    slider_set <- lapply(1:length(selected_sliders), function(i) {
-        popify(
-            sliderInput(
-                inputId = paste0(append_name,
-                                 "_",
-                                 names(selected_sliders)[i]), 
-                label   = selected_sliders[[i]]$pretty_name,
-                min     = selected_sliders[[i]]$ui_min, 
-                max     = selected_sliders[[i]]$ui_max,
-                value   = selected_sliders[[i]]$ui_median,
-                step    = ifelse(is.na(selected_sliders[[i]]$slider_rounding),
-                                 0.01,
-                                 selected_sliders[[i]]$slider_rounding)),
-            
-            title     = selected_sliders[[i]]$pretty_name,
-            content   = selected_sliders[[i]]$definition,
-            placement = "bottom",
-            trigger   = "hover"
-        )
+    # if there are no slider candidates, we skip creating a slider set and
+    # set the slider_set value so that it is handled properly later
+    if(!any(slider_index)) {
+        slider_set = NULL
+    } else {
         
-    })
+        # subset variable_config_list to just get the slider candidates
+        # (excluding the x-axis variabe)
+        selected_sliders <- variable_config_list[slider_index]
+        
+        # generate the sliders (and their popovers)
+        slider_set <- lapply(1:length(selected_sliders), function(i) {
+            popify(
+                sliderInput(
+                    inputId = paste0(append_name,
+                                     "_",
+                                     names(selected_sliders)[i]), 
+                    label   = selected_sliders[[i]]$pretty_name,
+                    min     = selected_sliders[[i]]$ui_min, 
+                    max     = selected_sliders[[i]]$ui_max,
+                    value   = selected_sliders[[i]]$ui_median,
+                    step    = ifelse(is.na(selected_sliders[[i]]$slider_rounding),
+                                     0.01,
+                                     selected_sliders[[i]]$slider_rounding)),
+                
+                title     = selected_sliders[[i]]$pretty_name,
+                content   = selected_sliders[[i]]$definition,
+                placement = "bottom",
+                trigger   = "hover"
+            )
+            
+        })
+    }
     
     # if facets are desired, we'll make drop-downs for each of those as well
     # (only really appropriate for Single Case mode)
@@ -1156,27 +1169,28 @@ apply_input_values <- function(update_target,
     # default is, on average, faster than testing if each input is related to
     # an interaction; it is also technically much easier to implement; this
     # claim may not hold if there are a large number of interactions)
-    
-    # create a list of the interaction column names split in half (by their
-    # matching split term)
-    column_names <- interaction_col_names$column_name
-    split_terms <- interaction_col_names$split_term
-    interaction_list <- list()
-    for(index in 1:length(column_names)) {
-        current_split <- strsplit(column_names[index], 
-                                  split_terms[index], 
-                                  perl = TRUE)
+    if(!is.na(interaction_col_names)) {
+        # create a list of the interaction column names split in half (by their
+        # matching split term)
+        column_names <- interaction_col_names$column_name
+        split_terms <- interaction_col_names$split_term
+        interaction_list <- list()
+        for(index in 1:length(column_names)) {
+            current_split <- strsplit(column_names[index], 
+                                      split_terms[index], 
+                                      perl = TRUE)
+            
+            interaction_list[[index]] <- current_split
+        }
         
-        interaction_list[[index]] <- current_split
-    }
-    
-    # update the interaction variables by multiplying their
-    # source columns together
-    for(current_set in 1:length(interaction_list)) {
-        matching_names <- unlist(interaction_list[[current_set]])
-        matching_cols <- update_target[matching_names]
-        updated_col <- apply(matching_cols, 1, prod)
-        update_target[column_names[[current_set]]] <- updated_col
+        # update the interaction variables by multiplying their
+        # source columns together
+        for(current_set in 1:length(interaction_list)) {
+            matching_names <- unlist(interaction_list[[current_set]])
+            matching_cols <- update_target[matching_names]
+            updated_col <- apply(matching_cols, 1, prod)
+            update_target[column_names[[current_set]]] <- updated_col
+        }
     }
     
     return(update_target)
