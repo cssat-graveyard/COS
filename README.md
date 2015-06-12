@@ -1,6 +1,8 @@
 # The POC Case Outcome Simulator (COS)
 The COS is an R and Shiny application for exploring a model of child welfare case outcomes through simulation and visualization. It is an instance of the [Multinomial Outcome Simulator (MOS)](https://github.com/bwaismeyer/MOS_framework).
 
+The COS can be seen in action [at this link that has totally always been here](http://ec2-52-8-38-141.us-west-1.compute.amazonaws.com:3939/COS/).
+
 Specifically, targeted user groups interact with the application by adjusting model inputs and then observing as the application simulates likelihoods for the four key case outcomes (Reunification, Adoption, Guardianship, and Emancipation) based on those inputs.
 
 There are different application "modes" for different user groups, all built upon the same application infrastructure but with user interface features and visualizations tailored to the user groups.
