@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/23/2015
-# Date updated: 6/9/2015
+# Date updated: 6/25/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -57,6 +57,19 @@ options(warn = -1)
 
 # snag the outcome variable from the formula (simplifies later calls)
 outcome_variable <<- as.character(base_formula[[2]])
+
+# flip the formula to a character vector so we can use this vector to subset the
+# dataframe so that any unused variables are dropped
+char_bf <- paste0(as.character(base_formula[2:3]), collapse = "~")
+# split the character string into individual terms (may include interactions)
+char_bf <- strsplit(char_bf, "\\+|\\~")
+# drop any white space around the terms and force the result to be a vector
+# of terms
+char_bf <- as.vector(sapply(char_bf, trimws))
+# drop any interaction terms
+char_bf <- char_bf[!grepl("\\*|\\:", char_bf)]
+# subset the dataframe
+base_data <- base_data[char_bf]
 
 # expand the factors in the data object, re-add the outcome, drop the intercept
 exp_data <<- model.matrix(base_formula, base_data)

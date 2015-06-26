@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/25/2015
-# Date updated: 6/9/2015
+# Date updated: 6/25/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -82,20 +82,20 @@
 #     function from the devtools package:
 # devtools::install_github("chrisadolph/tile-simcf", subdir = "simcf")
 
-library(shiny)       # insuring that Shiny is packrat friendly and loaded
-library(shinyBS)     # expands base Shiny features (e.g., popovers)
-library(shinythemes) # allows using basic bootswatch without custom CSS file
-library(Cairo)       # supports improved plot quality across devices
-library(nnet)        # for fitting multinomial logit model
-library(combinat)    # for building interaction term permutations
-library(MASS)        # for multivariate sampling
-library(simcf)       # for creating counterfactual sets
-library(dplyr)       # serves various formatting needs
-library(reshape2)    # serves various formatting needs
-library(tidyr)       # serves various formatting needs
-library(ggplot2)     # our data visualization workhorse
-library(scales)      # for nice plot scales
-library(grid)        # need for "unit" function passed to ggplot
+library(shiny)         # insuring that Shiny is packrat friendly and loaded
+library(shinyBS)       # expands base Shiny features (e.g., popovers)
+library(shinythemes)   # allows using basic bootswatch without custom CSS file
+library(Cairo)         # supports improved plot quality across devices
+library(nnet)          # for fitting multinomial logit model
+library(combinat)      # for building interaction term permutations
+library(MASS)          # for multivariate sampling
+library(simcf)         # for creating counterfactual sets
+library(dplyr)         # serves various formatting needs
+library(reshape2)      # serves various formatting needs
+library(tidyr)         # serves various formatting needs
+library(ggplot2)       # our data visualization workhorse
+library(scales)        # for nice plot scales
+library(grid)          # need for "unit" function passed to ggplot
 
 ###############################################################################
 ## Functions to Simulate Outcome Likelihoods

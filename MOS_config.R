@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 5/12/2015
-# Date updated: 6/4/2015
+# Date updated: 6/25/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -31,10 +31,10 @@
 #
 #       Non-functional example code has been provided in each configuration
 #       section. A working example project with code can be observed here:
-#       https://github.com/bwaismeyer/MOS_framework/tree/MOS_demo
+#       https://github.com/bwaismeyer/MOS_demo
 #
 #       You can see the example project in action here:
-#       ## UPDATE NEEDED ##
+#       http://ec2-52-26-165-185.us-west-2.compute.amazonaws.com:3939/MOS_demo/
 #
 # SCRIPT OUTLINE:
 # - Name the Application Instance
@@ -103,7 +103,7 @@ MOS_instance_name <- "The Case Outcome Simulator"
 ## Import and Name the Data Object as Needed
 
 # source the base data and base model
-load("data_model_V4.RData")
+load("cos_data_6-25-15.RData")
 
 # explicitly choose the data object we will be working with
 # NOTE: incomplete cases will be dropped to avoid modeling/plotting issues
@@ -115,6 +115,9 @@ base_data$outcome <- factor(base_data$outcome, c("Reunification",
                                                  "Guardianship", 
                                                  "Emancipation"))
 
+# clean out the funny 27 year old case...
+base_data <- base_data[base_data$log_age_eps_begin < 3, ]
+
 ###############################################################################
 ## Specify the Multinomial Logit Formula
 
@@ -124,12 +127,9 @@ base_formula <-
     # outcome column
     outcome ~ 
     # additive terms
-    mist_scores + wrkg_scores + recep_scores + buyn_scores + log_age_eps_begin + 
-    non_min + male + log_par_age + married + hhnum_c + rel_plc + log_eps_rank + 
-    housing_hs_cnt + high_in + sm_coll + employ + REG + 
+    mist_scores + wrkg_scores + log_age_eps_begin + log_par_age + 
+    rel_plc + employ + housing_hs_cnt + hhnum_c + sm_coll + married
     # interaction terms
-    high_in : housing_hs_cnt + 
-    housing_hs_cnt : employ
 
 ###############################################################################
 ## Variable Configuration
@@ -232,63 +232,63 @@ variable_configuration <- list(
         transform_for_ui    = function(x) x + 3,
         transform_for_model = function(x) x - 3
     ),   
-    recep_scores = list(
-        pretty_name         = "Engagement: Parent Receptivity",
-        definition          = paste0("Parental openness to receiving help, ",
-                                     "characterized by recognition of ", 
-                                     "problems or circumstances that resulted ",
-                                     "in agency intervention and by a ",
-                                     "perceived need for help."),
-        ribbon_plot_summary = paste0("The association between the index of ",
-                                     "parent receptivity and the case ",
-                                     "outcomes is very weak. In other words, ",
-                                     "the receptivity index - at least by ",
-                                     "itself - has little association with ",
-                                     "the likelihood of simulated case ",
-                                     "outcomes."),
-        custom_x_axis_ticks = c("very low", "low", 
-                                "moderate", 
-                                "high", "very high"),
-        x_axis_candidate    = TRUE,
-        slider_candidate    = TRUE,
-        slider_rounding     = 1,
-        facet_candidate     = FALSE,
-        transform_for_ui    = function(x) x + 3,
-        transform_for_model = function(x) x - 3
-    ),    
-    buyn_scores = list(
-        pretty_name         = "Engagement: Parent Buy-In",
-        definition          = paste0("Parental perception of benefit; a sense ",
-                                     "of being helped or the expectation of ",
-                                     "receiving help through the agency ",
-                                     "involvement; a feeling that things are ",
-                                     "changing (or will change) for the ",
-                                     "better. Also includes a commitment to ",
-                                     "the helping process, characterized by ",
-                                     "active participation in planning or ",
-                                     "services, goal ownership, and ",
-                                     "initiative in seeking and using help."),
-        ribbon_plot_summary = paste0("There is a positive association between ",
-                                     "the index of parental ",
-                                     "commitment/participation and ",
-                                     "Reunification: the likelihood that ",
-                                     "simulated cases end in Reunification ",
-                                     "increases as the buy-in index increases.",
-                                     "<br><br>The likelihood of Guardianship ",
-                                     "decreases as the buy-in index ",
-                                     "increases. The likelihood of Adoption ",
-                                     "(moderately likely) and Emancipation ",
-                                     "(very unlikely) remain stable."),
-        custom_x_axis_ticks = c("very low", "low", 
-                                "moderate", 
-                                "high", "very high"),
-        x_axis_candidate    = TRUE,
-        slider_candidate    = TRUE,
-        slider_rounding     = 1,
-        facet_candidate     = FALSE,
-        transform_for_ui    = function(x) x + 3,
-        transform_for_model = function(x) x - 3
-    ),    
+#     recep_scores = list(
+#         pretty_name         = "Engagement: Parent Receptivity",
+#         definition          = paste0("Parental openness to receiving help, ",
+#                                      "characterized by recognition of ", 
+#                                      "problems or circumstances that resulted ",
+#                                      "in agency intervention and by a ",
+#                                      "perceived need for help."),
+#         ribbon_plot_summary = paste0("The association between the index of ",
+#                                      "parent receptivity and the case ",
+#                                      "outcomes is very weak. In other words, ",
+#                                      "the receptivity index - at least by ",
+#                                      "itself - has little association with ",
+#                                      "the likelihood of simulated case ",
+#                                      "outcomes."),
+#         custom_x_axis_ticks = c("very low", "low", 
+#                                 "moderate", 
+#                                 "high", "very high"),
+#         x_axis_candidate    = TRUE,
+#         slider_candidate    = TRUE,
+#         slider_rounding     = 1,
+#         facet_candidate     = FALSE,
+#         transform_for_ui    = function(x) x + 3,
+#         transform_for_model = function(x) x - 3
+#     ),    
+#     buyn_scores = list(
+#         pretty_name         = "Engagement: Parent Buy-In",
+#         definition          = paste0("Parental perception of benefit; a sense ",
+#                                      "of being helped or the expectation of ",
+#                                      "receiving help through the agency ",
+#                                      "involvement; a feeling that things are ",
+#                                      "changing (or will change) for the ",
+#                                      "better. Also includes a commitment to ",
+#                                      "the helping process, characterized by ",
+#                                      "active participation in planning or ",
+#                                      "services, goal ownership, and ",
+#                                      "initiative in seeking and using help."),
+#         ribbon_plot_summary = paste0("There is a positive association between ",
+#                                      "the index of parental ",
+#                                      "commitment/participation and ",
+#                                      "Reunification: the likelihood that ",
+#                                      "simulated cases end in Reunification ",
+#                                      "increases as the buy-in index increases.",
+#                                      "<br><br>The likelihood of Guardianship ",
+#                                      "decreases as the buy-in index ",
+#                                      "increases. The likelihood of Adoption ",
+#                                      "(moderately likely) and Emancipation ",
+#                                      "(very unlikely) remain stable."),
+#         custom_x_axis_ticks = c("very low", "low", 
+#                                 "moderate", 
+#                                 "high", "very high"),
+#         x_axis_candidate    = TRUE,
+#         slider_candidate    = TRUE,
+#         slider_rounding     = 1,
+#         facet_candidate     = FALSE,
+#         transform_for_ui    = function(x) x + 3,
+#         transform_for_model = function(x) x - 3
+#     ),    
     log_age_eps_begin = list(
         pretty_name         = "Child Age at Episode Begin",
         definition          = paste0("The age of the child (in years) as of ",
@@ -346,19 +346,19 @@ variable_configuration <- list(
         transform_for_ui    = identity,
         transform_for_model = identity
     ),   
-    REG = list(
-        pretty_name         = "Administrative Region",
-        definition          = paste0("An indicator of the administrative ",
-                                     "region of the child welfare case."),
-        ribbon_plot_summary = paste0(""),
-        custom_x_axis_ticks = NULL,
-        x_axis_candidate    = FALSE,
-        slider_candidate    = FALSE,
-        slider_rounding     = NA,
-        facet_candidate     = TRUE,
-        transform_for_ui    = identity,
-        transform_for_model = identity
-    ),
+#     REG = list(
+#         pretty_name         = "Administrative Region",
+#         definition          = paste0("An indicator of the administrative ",
+#                                      "region of the child welfare case."),
+#         ribbon_plot_summary = paste0(""),
+#         custom_x_axis_ticks = NULL,
+#         x_axis_candidate    = FALSE,
+#         slider_candidate    = FALSE,
+#         slider_rounding     = NA,
+#         facet_candidate     = TRUE,
+#         transform_for_ui    = identity,
+#         transform_for_model = identity
+#     ),
     employ = list(
         pretty_name         = "Parental Employment Status",
         definition          = paste0("An indicator as to whether or not the ",
@@ -384,14 +384,69 @@ variable_configuration <- list(
         slider_candidate    = FALSE,
         slider_rounding     = NA,
         facet_candidate     = TRUE,
+        transform_for_ui    = exp,
+        transform_for_model = log
+    ),
+#     high_in = list(
+#         pretty_name         = "Parental Income Status",
+#         definition          = paste0("An indicator as to whether or not the ",
+#                                      "reported parental income is less than ",
+#                                      "(or equal to) 10,000 dollars."),
+#         ribbon_plot_summary = paste0(""),
+#         custom_x_axis_ticks = NULL,
+#         x_axis_candidate    = FALSE,
+#         slider_candidate    = FALSE,
+#         slider_rounding     = NA,
+#         facet_candidate     = TRUE,
+#         transform_for_ui    = identity,
+#         transform_for_model = identity
+#     ),
+    log_par_age = list(
+        pretty_name         = "Parent Age at Episode Begin",
+        definition          = paste0("The age of the parent in years at the ",
+                                     "point of the removal."),
+        ribbon_plot_summary = paste0(""),
+        custom_x_axis_ticks = NULL,
+        x_axis_candidate    = TRUE,
+        slider_candidate    = TRUE,
+        slider_rounding     = 1,
+        facet_candidate     = FALSE,
+        transform_for_ui    = exp,
+        transform_for_model = exp
+    ),
+    rel_plc = list(
+        pretty_name         = "Placement with a Relative",
+        definition          = paste0("An indicator as to whether or not the ",
+                                     "longest placement during the ",
+                                     "episode was with a relative or not."),
+        ribbon_plot_summary = paste0(""),
+        custom_x_axis_ticks = NULL,
+        x_axis_candidate    = FALSE,
+        slider_candidate    = FALSE,
+        slider_rounding     = NA,
+        facet_candidate     = TRUE,
         transform_for_ui    = identity,
         transform_for_model = identity
     ),
-    high_in = list(
-        pretty_name         = "Parental Income Status",
+    hhnum_c = list(
+        pretty_name         = "Household Income",
+        definition          = paste0("An index of relative household ",
+                                     "income. Income here here is ",
+                                     "split into 10k dollar brackets."),
+        ribbon_plot_summary = paste0(""),
+        custom_x_axis_ticks = NULL,
+        x_axis_candidate    = TRUE,
+        slider_candidate    = TRUE,
+        slider_rounding     = 1,
+        facet_candidate     = FALSE,
+        transform_for_ui    = identity,
+        transform_for_model = identity
+    ),
+    married = list(
+        pretty_name         = "Parents Married ",
         definition          = paste0("An indicator as to whether or not the ",
-                                     "reported parental income is less than ",
-                                     "(or equal to) 10,000 dollars."),
+                                     "parents were married at the time of ",
+                                     "the parent interview."),
         ribbon_plot_summary = paste0(""),
         custom_x_axis_ticks = NULL,
         x_axis_candidate    = FALSE,
