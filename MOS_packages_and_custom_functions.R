@@ -197,8 +197,8 @@ get_cf_cases <- function(exp_data,
     if(is.null(x_range)) {
         # if not provided, calculate the range from the dataset
         # floor and ceiling used to insure some space around the observed data
-        x_range[1] <- floor(min(exp_data[x_axis_selected]))
-        x_range[2] <- ceiling(max(exp_data[x_axis_selected]))
+        x_range[1] <- min(exp_data[x_axis_selected])
+        x_range[2] <- max(exp_data[x_axis_selected])
     }
     
     # initialize the minimum set of counterfactuals (the x-axis variable cuts)
@@ -636,7 +636,8 @@ get_ribbon_plot <- function(formatted_likelihoods,
                             x_lab = "Predictor", 
                             y_lab = "Probability of Outcome",
                             custom_colors = NULL,
-                            custom_x_axis_ticks = NULL) {
+                            custom_breaks = NULL,
+                            custom_labels = NULL) {
     
     plot_object <- ggplot(formatted_likelihoods, 
                           aes(x = predictor, group = group)) +
@@ -651,19 +652,34 @@ get_ribbon_plot <- function(formatted_likelihoods,
         scale_y_continuous(limits = c(0, 1),
                            labels = percent,
                            expand = c(0, 0)) +
-        scale_x_continuous(expand = c(0, 0)) +
         # theme adjustments
         MOS_theme +
         guides(fill = guide_legend(title = NULL))
     
-    # if custom_x_axis_ticks are provided, add these to an appropriate place
-    # inside the plot
-    if(!is.null(custom_x_axis_ticks)) {
+    # now we want to customize the x-axis but how we do this will depend on
+    # how custom_breaks and custom_labels are configured
+    # 1. custom breaks, no custom labels
+    if(!is.null(custom_breaks) & is.null(custom_labels)) {
+        plot_object <- plot_object + 
+            scale_x_continuous(expand = c(0, 0),
+                               breaks = custom_breaks)
+    # 2. custom labels, no custom breaks
+    } else if(is.null(custom_breaks) & !is.null(custom_labels)) {
         plot_object <- plot_object +
             scale_x_continuous(expand = c(0, 0), 
-                               labels = custom_x_axis_ticks)
+                               labels = custom_labels)
+    # 3. both customized
+    } else if(!is.null(custom_breaks) & !is.null(custom_labels)) {
+        plot_object <- plot_object +
+            scale_x_continuous(expand = c(0, 0),
+                               breaks = custom_breaks,
+                               labels = custom_labels)
+    # 4. neither customized
+    } else {
+        plot_object <- plot_object +
+            scale_x_continuous(expand = c(0, 0))
     }
-    
+
     # if custom colors are provided, adjust the color scale and update theme
     if(!is.null(custom_colors)) {
         plot_object <- plot_object + 
@@ -680,7 +696,7 @@ get_ribbon_plot <- function(formatted_likelihoods,
         # if custom x-axis ticks are provided, also want to tweak the x-axis
         # tick text and orientation to minimize collisions/overlap between
         # facets
-        if(!is.null(custom_x_axis_ticks)) {
+        if(!is.null(custom_labels)) {
             plot_object <- plot_object +
                 theme(axis.text.x = element_text(size = 8, angle = 45, 
                                                  hjust = 1, vjust = 1)

@@ -344,9 +344,13 @@ shinyServer(function(input, output, session) {
                         y_lab = "Simulated Probability", 
                         x_lab = isolate(input$x_axis_choice),
                         custom_colors = custom_outcome_colors,
-                        isolate(
+                        custom_breaks = isolate(
                             variable_configuration[[x_axis_var]]$
-                                custom_x_axis_ticks)
+                                custom_x_breaks),
+                        custom_labels = isolate(
+                            variable_configuration[[x_axis_var]]$
+                                custom_x_labels
+                        )
         )
     })
     
