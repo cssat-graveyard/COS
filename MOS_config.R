@@ -384,8 +384,8 @@ variable_configuration <- list(
         slider_candidate    = FALSE,
         slider_rounding     = NA,
         facet_candidate     = TRUE,
-        transform_for_ui    = exp,
-        transform_for_model = log
+        transform_for_ui    = identity,
+        transform_for_model = identity
     ),
 #     high_in = list(
 #         pretty_name         = "Parental Income Status",
@@ -412,7 +412,7 @@ variable_configuration <- list(
         slider_rounding     = 1,
         facet_candidate     = FALSE,
         transform_for_ui    = exp,
-        transform_for_model = exp
+        transform_for_model = log
     ),
     rel_plc = list(
         pretty_name         = "Placement with a Relative",
