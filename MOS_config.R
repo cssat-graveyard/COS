@@ -72,6 +72,13 @@
 #   - If you want to load multiple CSS files, you will need to update the 
 #     appropriate section of ui.R directly.
 #
+# - Custom Footer Text (Optional)
+#   - Provide a character string that will be HTML formatted. Some default
+#     CSS styling is provided by you may want to define a "footer" class
+#     and specify your own formatting.
+#   - Set footer_text to NULL or an empty string if you do not want a custom
+#     footer.
+#
 # - Ribbon Plot Addendum (Optional)
 #   - If you want to provide any additional text (e.g., caveats, general
 #     context) beneath the ribbon plot text body, you can assign an HTML-
@@ -181,7 +188,7 @@ base_formula <-
 
 variable_configuration <- list(   
     mist_scores = list(
-        pretty_name         = "Engagement: Parent Trusts Case Worker",
+        pretty_name         = "Parent Trusts Case Worker",
         definition          = paste0("Parental belief that the agency or ", 
                                      "case worker is sincere, honest, or ",
                                      "well-intentioned, with intent to help ",
@@ -196,8 +203,8 @@ variable_configuration <- list(
                                      "index increases. The likelihood of ",
                                      "Emancipation (very unlikely) remains ",
                                      "stable at all index levels."),
-        custom_x_breaks     = seq(range(base_data$mist_scores)[1],
-                                  range(base_data$mist_scores)[2],
+        custom_x_breaks     = seq(-range(base_data$mist_scores)[2],
+                                  -range(base_data$mist_scores)[1],
                                   diff(range(base_data$mist_scores))/4),
         custom_x_labels     = c("very low", "low", 
                                 "moderate", 
@@ -210,7 +217,7 @@ variable_configuration <- list(
         transform_for_model = function(x) -identity(x)
     ),    
     wrkg_scores = list(
-        pretty_name         = paste0("Engagement: Working Relationship ",
+        pretty_name         = paste0("Working Relationship ",
                                      "Between Parent and Case Worker"),
         definition          = paste0("Parental perception of the ",
                                      "interpersonal relationship with case ",
@@ -307,21 +314,21 @@ variable_configuration <- list(
                                      "out-of-home care."),
         ribbon_plot_summary = paste0("There is a high likelihood that ",
                                      "simulated cases end in Reunification if ",
-                                     "the case starts when the child about 2 ",
-                                     "to 12 years of age.<br><br>Prior to the ",
+                                     "the case starts when the child is about ",
+                                     "2-12 years of age.<br><br>Prior to the ",
                                      "second year, Adoption is also fairly ",
-                                     "likely - but it declines steeply from 0 ",
-                                     "to 5 years and then stabilizes until ",
-                                     "about 10 to 12 years.<br><br>The ",
+                                     "likely - but it declines steeply from ",
+                                     "0-5 years and then stabilizes until ",
+                                     "about 10-12 years.<br><br>The ",
                                      "likelihood that simulated cases end in ",
                                      "Guardianship slowly increases ",
                                      "(complimenting the decline in Adoption) ",
-                                     "until about 12 years.<br><br>At 10 to ",
-                                     "12 years, Reunification, Adoption, and ",
+                                     "until about 12 years.<br><br>At 10-12 ",
+                                     "years, Reunification, Adoption, and ",
                                      "Guardianship become rapidly less likely ",
                                      "as child age increases. Instead, ",
                                      "Emancipation becomes increasingly ",
-                                     "likely. By 13 to 15 years of age, it is ",
+                                     "likely. By 13-15 years of age, it is ",
                                      "the most likely outcome for simulated ",
                                      "cases."),
         custom_x_breaks     = NULL,
@@ -497,6 +504,14 @@ custom_outcome_colors <- c("#D9BB32", "#6DB33F", "#6E9CAE", "#B1662B",
 custom_css = "united.min.css"
 # CSS theme for entire project (current theme from here:
 # https://bootswatch.com/sandstone/)
+
+###############################################################################
+## Custom Footer Text (Optional)
+
+# HTML formatting will be parsed appropriately.
+footer_text <- paste0("<p class='footer'>&copy; 2015 Partners For Our ",
+                      "Children | PO Box 359476 | Seattle, WA 98195-9476 | ", 
+                      "206 221-3100</p>")
 
 ###############################################################################
 ## Ribbon Plot Addendum (Optional)

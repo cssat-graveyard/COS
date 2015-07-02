@@ -104,6 +104,8 @@ shinyUI(navbarPage(
     # global application settings
     MOS_instance_name,
     
+    footer = HTML(footer_text),
+    
     # using MOS to explore trends per predictor ("Explore Mode")
     tabPanel("Explore Mode", fluidPage(
         # set custom bootstrap.css if desired/available
@@ -132,26 +134,23 @@ shinyUI(navbarPage(
                                             fixed_ui_options$facet_options))
                ),
                
-               wellPanel( 
-                   actionLink("advanced_options_link",
-                              h4("Advanced Options")), 
-                   
-                   checkboxInput("show_inputs", 
-                                 label = "Show?",
-                                 FALSE),
-                   
-                   conditionalPanel(
-                       # only show if the "Advanced Options" box is ticked
-                       condition = "input.show_inputs == true",
-                       
-                       bsButton("update_explore_cf_cases",
-                                "Update Plot",
-                                block = TRUE),
-                       br(),
-                       br(),
-                       
-                       uiOutput("explore_input_set")
-                   )
+               bsCollapse(id = "adv_options",
+                          
+                          bsCollapsePanel( 
+                              h4("Advanced Options"),
+                              
+                              bsButton("update_explore_cf_cases",
+                                       "Update Plot",
+                                       block = TRUE),
+                              br(),
+                              br(),
+                              
+                              uiOutput("explore_input_set"),
+                              br(),
+                              
+                              actionLink("advanced_options_link",
+                                         "What do Advanced Options do?")
+                          )
                )
         ),
         

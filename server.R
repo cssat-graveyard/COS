@@ -200,9 +200,9 @@ shinyServer(function(input, output, session) {
         build_ribbon_summary(x_axis_raw_name(), 
                              facet_raw_name(),
                              variable_configuration,
-                             # if "Advanced Options" selected, we want to drop
+                             # if "Advanced Options" are open, we want to drop
                              # the plot summary
-                             include_plot_summary = !input$show_inputs)
+                             include_plot_summary = is.null(input$adv_options))
         
     })
         
@@ -234,10 +234,10 @@ shinyServer(function(input, output, session) {
         #       2. a new x-axis is selected (refreshes the plots that use
         #          explore_cf_cases() and resets the sliders if they are 
         #          visible)
-        # because "input$show_inputs" is not isolated, we also get the desired
+        # because "input$adv_options" is not isolated, we also get the desired
         # behavior that the data is restored to its default state if the
-        # "Advanced Options" box is unticked
-        if(input$show_inputs & input$update_explore_cf_cases > 0) {
+        # "Advanced Options" panel is collapsed
+        if(!is.null(input$adv_options) & input$update_explore_cf_cases > 0) {
             # note that the update_target here is allowed to be reactive
             # to create a reactive link when the sliders are visible
             apply_input_values(update_target = base_cf_cases(), 
