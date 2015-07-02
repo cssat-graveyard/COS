@@ -206,8 +206,8 @@ variable_configuration <- list(
         slider_candidate    = TRUE,
         slider_rounding     = 1,
         facet_candidate     = FALSE,
-        transform_for_ui    = identity,
-        transform_for_model = identity
+        transform_for_ui    = function(x) -identity(x),
+        transform_for_model = function(x) -identity(x)
     ),    
     wrkg_scores = list(
         pretty_name         = paste0("Engagement: Working Relationship ",
