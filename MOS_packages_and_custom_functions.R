@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/25/2015
-# Date updated: 6/25/2015
+# Date updated: 7/4/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -193,6 +193,7 @@ get_cf_cases <- function(exp_data,
                          x_range_density = 100,
                          facet_selected = NULL,
                          interaction_col_names = NA) {
+    
     # check if an explicit range has been provided for the x-axis variable
     if(is.null(x_range)) {
         # if not provided, calculate the range from the dataset
@@ -633,6 +634,7 @@ format_for_ribbon_plot <- function(raw_likelihoods,
 
 get_ribbon_plot <- function(formatted_likelihoods,
                             facet_selected = NULL,
+                            plot_title = "",
                             x_lab = "Predictor", 
                             y_lab = "Probability of Outcome",
                             custom_colors = NULL,
@@ -647,6 +649,7 @@ get_ribbon_plot <- function(formatted_likelihoods,
                         alpha = factor(ci))) +
         # label adjustements
         labs(x = x_lab, y = y_lab) +
+        ggtitle(plot_title) +
         # scale adjustments
         scale_alpha_manual(values = c(0.4, 0.5), guide = FALSE) +
         scale_y_continuous(limits = c(0, 1),

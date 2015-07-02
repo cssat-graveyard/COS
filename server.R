@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/23/2015
-# Date updated: 6/25/2015
+# Date updated: 7/4/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -53,7 +53,7 @@
 ## Server Initialization (Steps That Don't Need To Be Reactive)
 
 # TESTING SETTINGS TO INCREASE STABILITY ## TEMP ##
-options(warn = -1)
+# options(warn = -1)
 
 # snag the outcome variable from the formula (simplifies later calls)
 outcome_variable <<- as.character(base_formula[[2]])
@@ -306,7 +306,6 @@ shinyServer(function(input, output, session) {
     # coefficient set for our specific example case)
     sc_likelihoods <- reactive({
         # get the estimates for each coefficient set for just the first case
-        # 
         likelihoods_cloud <- MOS_mlogitsimev(sc_cf_cases(), 
                                              coeff_estimates, 
                                              ci = c(0.95, 0.50),
@@ -339,10 +338,12 @@ shinyServer(function(input, output, session) {
             ui_transform(ribbon_likelihoods$predictor)
         
         # draw the plot
-        get_ribbon_plot(ribbon_likelihoods, 
+        rp <- get_ribbon_plot(ribbon_likelihoods, 
                         facet_selected = isolate(facet_raw_name()),
                         y_lab = "Simulated Probability", 
-                        x_lab = isolate(input$x_axis_choice),
+                        x_lab = "",
+                        plot_title = variable_configuration[[x_axis_var]]$
+                            pretty_name,
                         custom_colors = custom_outcome_colors,
                         custom_breaks = isolate(
                             variable_configuration[[x_axis_var]]$
@@ -352,6 +353,9 @@ shinyServer(function(input, output, session) {
                                 custom_x_labels
                         )
         )
+        
+        # return the plot
+        return(rp)
     })
     
     # "Single Case Mode" dot cloud plot

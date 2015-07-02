@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 5/12/2015
-# Date updated: 6/25/2015
+# Date updated: 7/4/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -69,6 +69,8 @@
 #   - Assign the name of the bootstrap.css file to the character string 
 #     "custom_css" (just the name, Shiny will know to look in "www").
 #   - If you don't want to use a custom bootstrap.css, set "custom_css" to NULL.
+#   - If you want to load multiple CSS files, you will need to update the 
+#     appropriate section of ui.R directly.
 #
 # - Ribbon Plot Addendum (Optional)
 #   - If you want to provide any additional text (e.g., caveats, general
@@ -333,10 +335,12 @@ variable_configuration <- list(
     ),  
     housing_hs_cnt = list(
         pretty_name         = "Count of Housing Hardships",
-        definition          = paste0("The count of affirmative responses to ",
-                                     "survey questions concerning housing ",
-                                     "hardships (e.g. difficulty paying rent, ",
-                                     "couch-surfing, etc.)."),
+        definition          = paste0("The total number of the following ",
+                                     "hardships the parent had ", 
+                                     "experienced in the last 12 months: ", 
+                                     "eviction, homelessness, or an instance ", 
+                                     "in which they had been required to seek ",
+                                     "shelter from friends or family."),
         ribbon_plot_summary = paste0("There is a strong negative assocation ",
                                      "between the index of housing hardships ",
                                      "and Reunification: the likelihood that ",
@@ -431,8 +435,8 @@ variable_configuration <- list(
     rel_plc = list(
         pretty_name         = "Placement with a Relative",
         definition          = paste0("An indicator as to whether or not the ",
-                                     "longest placement during the ",
-                                     "episode was with a relative or not."),
+                                     "longest placement during the episode ",
+                                     "(so far) was with a relative or not."),
         ribbon_plot_summary = paste0(""),
         custom_x_breaks     = NULL,
         custom_x_labels     = NULL,
@@ -490,7 +494,7 @@ custom_outcome_colors <- c("#D9BB32", "#6DB33F", "#6E9CAE", "#B1662B",
 
 # Custom bootstrap.css file must be in the www subdirectory of the MOS
 # application. Set "custom_css" to NULL if you don't want to use one.
-custom_css = "sandstone_bootstrap.css"
+custom_css = "united.min.css"
 # CSS theme for entire project (current theme from here:
 # https://bootswatch.com/sandstone/)
 

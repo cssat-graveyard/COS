@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/23/2015
-# Date updated: 5/29/2015
+# Date updated: 7/4/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -71,9 +71,10 @@ MOS_theme <<- theme_bw(16) +
           panel.grid.major = element_blank(),
           strip.text = element_text(color = "white"),
           axis.text = element_text(size = 12),
-          axis.title.x = element_text(vjust = -3),
+          axis.title.x = element_text(vjust = -2),
           axis.title.y = element_text(vjust = 3),
           plot.margin = grid::unit(c(1, 1, 1, 1), "cm"),
+          plot.title = element_text(vjust = 3, face = "bold"),
           aspect.ratio = 2 / (1 + sqrt(5)),
           strip.background = element_rect(color = "#10475B", fill = "#10475B"),
           panel.border = element_rect(color = "#10475B"),
@@ -103,12 +104,21 @@ shinyUI(navbarPage(
     # global application settings
     MOS_instance_name,
     
-    # set custom bootstrap.css if desired/available
-    theme = shinytheme("united"),
-    # theme = custom_css,
-    
     # using MOS to explore trends per predictor ("Explore Mode")
     tabPanel("Explore Mode", fluidPage(
+        # set custom bootstrap.css if desired/available
+        # you can specify multiple css files here if desired (e.g., to load
+        # a small custom .css file to override some bootstrap behavior)
+        # this adjusts BOTH modes even though it only occurs in the "Explore
+        # Mode" section
+        tags$head(
+            tags$link(rel = "stylesheet", type = "text/css", 
+                      href = custom_css),
+            tags$link(rel = "stylesheet", type = "text/css", 
+                      href = "custom.css")
+            
+        ),
+        
         # define user tools in the first column
         # width = 3 of 12 (Shiny divides the horizontal space up into 12 sections)
         column(3, 
@@ -150,56 +160,54 @@ shinyUI(navbarPage(
         column(9, 
                plotOutput("ribbon_plot"),
                
-               wellPanel(
-                   uiOutput("ribbon_text"),
-                   HTML(ribbon_addendum),
-                   br(),
-                   br(),
-                   
-                   strong(
-                       actionLink("more_info_modal_link_explore",
-                                  more_info_link_text)
-                   ),
-                   
-                   bsModal("advanced_options_description",
-                           "What do 'Advanced Options' do?",
-                           "advanced_options_link",
-                           HTML(paste0("In the default view, when you select ",
-                                       "an x-axis variable the unselected ",
-                                       "variables are set to a reasonable ",
-                                       "value for you. Basically, we ",
-                                       "say: 'If we didn't know these values ",
-                                       "for a particular case, what would be ",
-                                       "the most appropriate guess to make?' ",
-                                       "We use the median values observed ",
-                                       "in our source data to set the ",
-                                       "values for the unselected ",
-                                       "variables.<br><br>",
-                                       "Advanced Options allows you to set ",
-                                       "the unselected x-axis variables to ",
-                                       "values of your choosing.<br><br>",
-                                       "This can be used to explore how the ",
-                                       "observed relationship between the ",
-                                       "selected x-axis variable and the ",
-                                       "simulated case outcomes changes ",
-                                       "dependent on the context of the other ",
-                                       "variables.<br><br>",
-                                       "More technically, this allows you to ",
-                                       "explore possible interactions among ",
-                                       "the predictor variables. For the ",
-                                       "interested reader, here one simple ",
-                                       "tutorial on interactions is available ",
-                                       "<a href=\"https://cdn1.sph.harvard.edu/wp-content/uploads/sites/603/2013/03/InteractionTutorial.pdf\">",
-                                       "here</a>."
-                                       )),
-                           size = "large"),
-                   
-                   bsModal("more_info_modal_explore",
-                           more_info_title,
-                           "more_info_modal_link_explore",
-                           HTML(more_info_body),
-                           size = "large")
-               )
+               uiOutput("ribbon_text"),
+               HTML(ribbon_addendum),
+               br(),
+               br(),
+               
+               strong(
+                   actionLink("more_info_modal_link_explore",
+                              more_info_link_text)
+               ),
+               
+               bsModal("advanced_options_description",
+                       "What do 'Advanced Options' do?",
+                       "advanced_options_link",
+                       HTML(paste0("In the default view, when you select ",
+                                   "an x-axis variable the unselected ",
+                                   "variables are set to a reasonable ",
+                                   "value for you. Basically, we ",
+                                   "say: 'If we didn't know these values ",
+                                   "for a particular case, what would be ",
+                                   "the most appropriate guess to make?' ",
+                                   "We use the median values observed ",
+                                   "in our source data to set the ",
+                                   "values for the unselected ",
+                                   "variables.<br><br>",
+                                   "Advanced Options allows you to set ",
+                                   "the unselected x-axis variables to ",
+                                   "values of your choosing.<br><br>",
+                                   "This can be used to explore how the ",
+                                   "observed relationship between the ",
+                                   "selected x-axis variable and the ",
+                                   "simulated case outcomes changes ",
+                                   "dependent on the context of the other ",
+                                   "variables.<br><br>",
+                                   "More technically, this allows you to ",
+                                   "explore possible interactions among ",
+                                   "the predictor variables. For the ",
+                                   "interested reader, a simple, solid ",
+                                   "tutorial on interactions is available ",
+                                   "<a href=\"https://cdn1.sph.harvard.edu/wp-content/uploads/sites/603/2013/03/InteractionTutorial.pdf\">",
+                                   "here</a>."
+                       )),
+                       size = "large"),
+               
+               bsModal("more_info_modal_explore",
+                       more_info_title,
+                       "more_info_modal_link_explore",
+                       HTML(more_info_body),
+                       size = "large")
         )
     )),
     
@@ -225,22 +233,22 @@ shinyUI(navbarPage(
         column(9,
                plotOutput("dot_cloud_plot"),
                
-               wellPanel(
-                   HTML(dot_cloud_addendum),
-                   br(),
-                   br(),
-                   
-                   strong(
-                       actionLink("more_info_modal_link_sc",
-                                  more_info_link_text)
-                   ),
-                   
-                   bsModal("more_info_modal_sc",
-                           more_info_title,
-                           "more_info_modal_link_sc",
-                           HTML(more_info_body),
-                           size = "large")
-               )
+               
+               HTML(dot_cloud_addendum),
+               br(),
+               br(),
+               
+               strong(
+                   actionLink("more_info_modal_link_sc",
+                              more_info_link_text)
+               ),
+               
+               bsModal("more_info_modal_sc",
+                       more_info_title,
+                       "more_info_modal_link_sc",
+                       HTML(more_info_body),
+                       size = "large")
+               
         )
     ))
 ))
