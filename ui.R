@@ -226,11 +226,14 @@ shinyUI(navbarPage(
                         "Simulate",
                         block = TRUE),
                br(),
-               
-               bsCollapsePanel(
-                   "Describe Case",
+               bsCollapse(
+                   bsCollapsePanel(
+                       "Describe Case",
+                       
+                       uiOutput("sc_input_set")
+                   ),
                    
-                   uiOutput("sc_input_set")
+                   open = "Describe Case"
                )
         ),
         
