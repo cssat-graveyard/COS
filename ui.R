@@ -124,12 +124,19 @@ shinyUI(navbarPage(
         # define user tools in the first column
         # width = 3 of 12 (Shiny divides the horizontal space up into 12 sections)
         column(3, 
-               wellPanel(               
-                   radioButtons("x_axis_choice", label = h4("Select X-Axis"), 
-                                choices = fixed_ui_options$x_axis_options),
+               bsCollapsePanel(
+                   "Select X-Axis",
+                   
+                   radioButtons("x_axis_choice", 
+                                label = NULL, 
+                                choices = fixed_ui_options$x_axis_options)
+               ),
+               
+               bsCollapsePanel(
+                   "Compare By...",
                    
                    radioButtons("facet_choice", 
-                                label = h4("Compare By..."),
+                                label = NULL,
                                 choices = c("No Comparison Selected", 
                                             fixed_ui_options$facet_options))
                ),
@@ -137,7 +144,7 @@ shinyUI(navbarPage(
                bsCollapse(id = "adv_options",
                           
                           bsCollapsePanel( 
-                              h4("Advanced Options"),
+                              "Advanced Options",
                               
                               bsButton("update_explore_cf_cases",
                                        "Update Plot",
@@ -215,14 +222,13 @@ shinyUI(navbarPage(
     tabPanel("Single Case Mode", fluidPage(
         # define user tools in the first column
         column(3, 
-               wellPanel(
-                   helpText(h4("Case Values")),
-                   
-                   bsButton("update_sc_cf_cases",
-                            "Simulate",
-                            block = TRUE),
-                   br(),
-                   br(),
+               bsButton("update_sc_cf_cases",
+                        "Simulate",
+                        block = TRUE),
+               br(),
+               
+               bsCollapsePanel(
+                   "Describe Case",
                    
                    uiOutput("sc_input_set")
                )
