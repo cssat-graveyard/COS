@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/23/2015
-# Date updated: 7/4/2015
+# Date updated: 7/6/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -146,9 +146,17 @@ shinyUI(navbarPage(
                           bsCollapsePanel( 
                               "Advanced Options",
                               
+                              # button that will apply the slider values (i.e., 
+                              # will re-run the simulation with current values)
                               bsButton("update_explore_cf_cases",
                                        "Update Plot",
                                        block = TRUE),
+                              # button that will reset the values to their defaults (i.e.,
+                              # to the median values in the base data set)
+                              bsButton("reset_explore_inputs",
+                                       "Reset",
+                                       block = TRUE,
+                                       style = "warning"),
                               br(),
                               br(),
                               
@@ -168,13 +176,6 @@ shinyUI(navbarPage(
                
                uiOutput("ribbon_text"),
                HTML(ribbon_addendum),
-               br(),
-               br(),
-               
-               strong(
-                   actionLink("more_info_modal_link_explore",
-                              more_info_link_text)
-               ),
                
                bsModal("advanced_options_description",
                        "What do 'Advanced Options' do?",
@@ -207,12 +208,6 @@ shinyUI(navbarPage(
                                    "<a href=\"https://cdn1.sph.harvard.edu/wp-content/uploads/sites/603/2013/03/InteractionTutorial.pdf\">",
                                    "here</a>."
                        )),
-                       size = "large"),
-               
-               bsModal("more_info_modal_explore",
-                       more_info_title,
-                       "more_info_modal_link_explore",
-                       HTML(more_info_body),
                        size = "large")
         )
     )),
@@ -221,10 +216,18 @@ shinyUI(navbarPage(
     # Mode")
     tabPanel("Single Case Mode", fluidPage(
         # define user tools in the first column
-        column(3, 
+        column(3,
+               # button that will apply the slider/dropdown values (i.e., 
+               # will re-run the simulation with current values)
                bsButton("update_sc_cf_cases",
                         "Simulate",
                         block = TRUE),
+               # button that will reset the values to their defaults (i.e.,
+               # to the median values in the base data set)
+               bsButton("reset_sc_inputs",
+                        "Reset",
+                        block = TRUE,
+                        style = "warning"),
                br(),
                bsCollapse(
                    bsCollapsePanel(
@@ -241,22 +244,16 @@ shinyUI(navbarPage(
         column(9,
                plotOutput("dot_cloud_plot"),
                
+               HTML(dot_cloud_addendum)
+        )
+    )),
+    
+    # an "About" section where additional information can be provided about
+    # the application instance
+    tabPanel(about_title, fluidPage(
+        column(8, offset = 2,
                
-               HTML(dot_cloud_addendum),
-               br(),
-               br(),
-               
-               strong(
-                   actionLink("more_info_modal_link_sc",
-                              more_info_link_text)
-               ),
-               
-               bsModal("more_info_modal_sc",
-                       more_info_title,
-                       "more_info_modal_link_sc",
-                       HTML(more_info_body),
-                       size = "large")
-               
+               HTML(about_body)
         )
     ))
 ))

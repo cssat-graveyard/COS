@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/25/2015
-# Date updated: 7/4/2015
+# Date updated: 7/6/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW

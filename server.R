@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/23/2015
-# Date updated: 7/4/2015
+# Date updated: 7/6/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -119,15 +119,27 @@ shinyServer(function(input, output, session) {
     })
     
     ## Update the dynamic parts of the UI.
-    # generate the sliders for the "Explore Mode"
+    # generate the input set (sliders only) for the "Explore Mode"
     output$explore_input_set <- renderUI({
+        # establish a reactive link to the "Reset" button - if this button is
+        # triggered the inputs will be recreated (resetting them to their 
+        # default values)
+        input$reset_explore_inputs
+        
+        # make the inputs
         make_inputs(variable_config_list = variable_configuration,
                     variables_to_drop = x_axis_raw_name(),
                     append_name = "explore")
     })
     
-    # generate the sliders for the "Single Case Mode"
+    # generate the input set (sliders + dropdowns) for the "Single Case Mode"
     output$sc_input_set <- renderUI({
+        # establish a reactive link to the "Reset" button - if this button is
+        # triggered the inputs will be recreated (resetting them to their 
+        # default values)
+        input$reset_sc_inputs
+        
+        # make the inputs
         make_inputs(variable_config_list = variable_configuration,
                     variables_to_drop = NA,
                     append_name = "sc",
@@ -174,7 +186,7 @@ shinyServer(function(input, output, session) {
         ({if(isolate(input$update_sc_cf_cases) == 0) {
             updateButton(session, "update_sc_cf_cases",
                          label = "RUN FIRST SIMULATION",
-                         style = "warning")
+                         style = "danger")
         } else {
             updateButton(session, "update_sc_cf_cases",
                          label = "RE-SIMULATE",

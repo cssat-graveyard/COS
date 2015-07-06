@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 5/12/2015
-# Date updated: 7/4/2015
+# Date updated: 7/6/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -89,19 +89,13 @@
 #   - Same but for the dot cloud plot (dot_cloud_addendum).
 #   - Set this variable to NULL if you don't want to add anything.
 #
-# - More Info Modal (Optional)
-#   - If you want additional information about the plots to be available to
-#     the user but you don't want to clutter up the space beneath the plot
-#     with a lot of text...
-#   - One option is to simply put HTML anchor tags and links into the relevant
-#     addendum.
-#   - However, if you don't want your user to have to leave the application,
-#     you can adjust the features in this section to make a modal link and
-#     window available to the user. The link will appear after the plot
-#     addendum (if there is one).
-#   - Modal details: http://ebailey78.github.io/shinyBS/docs/Modals.html
-#   - Simply set "more_info_link_text" to NULL if you don't want to use the
-#     modal at all.
+# - About Section
+#   - Place to specify more general information about the application instance -
+#     especially useful to avoid cluttering the Explore/Single Case pages with
+#     excess text.
+#   - The entire page will be nicely centered (8 wide with a buffer of 2 on
+#     both sides). You simply need to provide a plain text title and HTML
+#     formatted body.
 
 ###############################################################################
 ## Name the Application Instance
@@ -563,23 +557,18 @@ dot_cloud_addendum <-
            "(how spread out are the dots for each outcome?)")
 
 ###############################################################################
-## More Info Modal (Optional)
+## About Section
 
-# What should be the text for the user-facing link that can open the more info
-# modal? Plain text string - no HTML formatting (will be formatted to look like 
-# a section title in ui.R). Set to NULL if you don't want to use the more info
-# modal at all.
-more_info_link_text <- "What is the simulation based on?"
+# Formal title for the About page. Plain text string.
+about_title <- "About"
 
-# Set the title for the modal window. 
-more_info_title <- "What is the simulation based on?"
-
-# Build the body for the modal window. This can technically be any Shiny R
+# Build the body for the about page. This can technically be any Shiny R
 # UI objects, but by default should simply be a block of HTML formatted text.
 # You will need to reference and adjust the ui.R and server.R scripts if you 
 # want more complex Shiny R features here.
-more_info_body <- 
-    paste0("The simulation is modeled on real data: a survey of child ",
+about_body <- 
+    paste0("<strong>What is the simulation based on?</strong>",
+           "<br>The simulation is modeled on real data: a survey of child ",
            "welfare-involved parents performed in 2008 by Partners for Our ",
            "Children and linked to administrative data from Children's ",
            "Administration.",
@@ -597,7 +586,7 @@ more_info_body <-
            "<br><br>PLACEHOLDER FOR ANY OTHER KEY PUBLICATIONS.",
            
            "<br><br>Yatchmenoff, D.K. (2005). Measuring client engagement from 
-           the client’s perspective in non-voluntary child protective services. 
+           the client&#39;s perspective in non-voluntary child protective services. 
            Research on Social Work Practice, 15, 84-96.")
 
 
