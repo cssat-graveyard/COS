@@ -976,57 +976,62 @@ add_input_features <- function(variable_config_object, base_data) {
 make_inputs <- function(variable_config_list, 
                         variables_to_drop = NA,
                         append_name,
-                        facet_as_dropdown = FALSE) {
-    # index which variables are slider candidates
-    slider_index <- unlist(lapply(variable_config_list, 
-                                  function(x) x$slider_candidate == TRUE))
-    
-    # if a vector of variables to drop has been provided, adjust their indices 
-    # to FALSE so sliders are not made for them (this is primarily useful for
-    # dropping the x-axis variable where needed)
-    if(!is.na(variables_to_drop)) {
-        for(index in 1:length(variables_to_drop)) {
-            slider_index[variables_to_drop[index]] <- FALSE
+                        return_sliders,
+                        return_facets) {
+    # if sliders are desired, we'll make a slider for each slider candidate
+    # (excluding any variables listed in "variables to drop")
+    if(return_sliders) {
+        # index which variables are slider candidates
+        slider_index <- unlist(lapply(variable_config_list, 
+                                      function(x) x$slider_candidate == TRUE))
+        
+        # if a vector of variables to drop has been provided, adjust their indices 
+        # to FALSE so sliders are not made for them (this is primarily useful for
+        # dropping the x-axis variable where needed)
+        if(!is.na(variables_to_drop)) {
+            for(index in 1:length(variables_to_drop)) {
+                slider_index[variables_to_drop[index]] <- FALSE
+            }
         }
-    }
-    
-    # if there are no slider candidates, we skip creating a slider set and
-    # set the slider_set value so that it is handled properly later
-    if(!any(slider_index)) {
-        slider_set = NULL
-    } else {
         
-        # subset variable_config_list to just get the slider candidates
-        # (excluding the x-axis variabe)
-        selected_sliders <- variable_config_list[slider_index]
-        
-        # generate the sliders (and their popovers)
-        slider_set <- lapply(1:length(selected_sliders), function(i) {
-            popify(
-                sliderInput(
-                    inputId = paste0(append_name,
-                                     "_",
-                                     names(selected_sliders)[i]), 
-                    label   = selected_sliders[[i]]$pretty_name,
-                    min     = selected_sliders[[i]]$ui_min, 
-                    max     = selected_sliders[[i]]$ui_max,
-                    value   = selected_sliders[[i]]$ui_median,
-                    step    = ifelse(is.na(selected_sliders[[i]]$slider_rounding),
-                                     0.01,
-                                     selected_sliders[[i]]$slider_rounding)),
-                
-                title     = selected_sliders[[i]]$pretty_name,
-                content   = selected_sliders[[i]]$definition,
-                placement = "bottom",
-                trigger   = "hover"
-            )
+        # if there are no slider candidates, we skip creating a slider set and
+        # set the slider_set value so that it is handled properly later
+        if(!any(slider_index)) {
+            slider_set = NULL
+        } else {
             
-        })
+            # subset variable_config_list to just get the slider candidates
+            # (excluding the x-axis variabe)
+            selected_sliders <- variable_config_list[slider_index]
+            
+            # generate the sliders (and their popovers)
+            slider_set <- lapply(1:length(selected_sliders), function(i) {
+                popify(
+                    sliderInput(
+                        inputId = paste0(append_name,
+                                         "_",
+                                         names(selected_sliders)[i]), 
+                        label   = selected_sliders[[i]]$pretty_name,
+                        min     = selected_sliders[[i]]$ui_min, 
+                        max     = selected_sliders[[i]]$ui_max,
+                        value   = selected_sliders[[i]]$ui_median,
+                        step    = ifelse(is.na(selected_sliders[[i]]$slider_rounding),
+                                         0.01,
+                                         selected_sliders[[i]]$slider_rounding)),
+                    
+                    title     = selected_sliders[[i]]$pretty_name,
+                    content   = selected_sliders[[i]]$definition,
+                    placement = "bottom",
+                    trigger   = "hover"
+                )
+                
+            })
+        }
     }
     
     # if facets are desired, we'll make drop-downs for each of those as well
     # (only really appropriate for Single Case mode)
-    if(facet_as_dropdown) {
+    if(return_facets) {
         # index which variables are facet candidates
         facet_index <- unlist(lapply(variable_config_list, 
                                      function(x) x$facet_candidate == TRUE))
@@ -1039,32 +1044,40 @@ make_inputs <- function(variable_config_list,
             }
         }
         
-        # subset variable_config_list to just get the facet candidates
-        selected_dropdowns <- variable_config_list[facet_index]
-        
-        # generate the dropdowns (and their popovers)
-        dropdown_set <- lapply(1:length(selected_dropdowns), function(i) {
-            popify(
-                selectInput(
-                    inputId = paste0(append_name,
-                                     "_",
-                                     names(selected_dropdowns)[i]), 
-                    label   = selected_dropdowns[[i]]$pretty_name,
-                    choices = selected_dropdowns[[i]]$ui_levels),
-                
-                title     = selected_dropdowns[[i]]$pretty_name,
-                content   = selected_dropdowns[[i]]$definition,
-                placement = "right",
-                trigger   = "hover",
-                options = list(container = "body")
-            )
-        })
+        # if there are no dropdown candidates, we skip creating dropdowns and
+        # set the dropdown_set value so that it is handled properly later
+        if(!any(facet_index)) {
+            facet_set = NULL
+        } else {
+            # subset variable_config_list to just get the facet candidates
+            selected_facets <- variable_config_list[facet_index]
+            
+            # generate the dropdowns (and their popovers)
+            facet_set <- lapply(1:length(selected_facets), function(i) {
+                popify(
+                    selectInput(
+                        inputId = paste0(append_name,
+                                         "_",
+                                         names(selected_facets)[i]), 
+                        label   = selected_facets[[i]]$pretty_name,
+                        choices = selected_facets[[i]]$ui_levels),
+                    
+                    title     = selected_facets[[i]]$pretty_name,
+                    content   = selected_facets[[i]]$definition,
+                    placement = "right",
+                    trigger   = "hover",
+                    options = list(container = "body")
+                )
+            })
+        }
     }
     
-    if(exists("dropdown_set")) {
-        return(c(slider_set, dropdown_set))
-    } else {
+    if(exists("slider_set") & exists("facet_set")) {
+        return(c(slider_set, facet_set))
+    } else if(exists("slider_set")) {
         return(slider_set)   
+    } else {
+        return(facet_set)
     }
 }
 

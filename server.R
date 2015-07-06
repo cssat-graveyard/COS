@@ -120,7 +120,7 @@ shinyServer(function(input, output, session) {
     
     ## Update the dynamic parts of the UI.
     # generate the input set (sliders only) for the "Explore Mode"
-    output$explore_input_set <- renderUI({
+    output$explore_slider_set <- renderUI({
         # establish a reactive link to the "Reset" button - if this button is
         # triggered the inputs will be recreated (resetting them to their 
         # default values)
@@ -129,11 +129,13 @@ shinyServer(function(input, output, session) {
         # make the inputs
         make_inputs(variable_config_list = variable_configuration,
                     variables_to_drop = x_axis_raw_name(),
-                    append_name = "explore")
+                    append_name = "explore",
+                    return_sliders = TRUE,
+                    return_facets = FALSE)
     })
     
-    # generate the input set (sliders + dropdowns) for the "Single Case Mode"
-    output$sc_input_set <- renderUI({
+    # generate the input sets (sliders + dropdowns) for the "Single Case Mode"
+    output$sc_slider_set <- renderUI({
         # establish a reactive link to the "Reset" button - if this button is
         # triggered the inputs will be recreated (resetting them to their 
         # default values)
@@ -143,7 +145,22 @@ shinyServer(function(input, output, session) {
         make_inputs(variable_config_list = variable_configuration,
                     variables_to_drop = NA,
                     append_name = "sc",
-                    facet_as_dropdown = TRUE)
+                    return_sliders = TRUE,
+                    return_facets = FALSE)
+    })
+    
+    output$sc_dropdown_set <- renderUI({
+        # establish a reactive link to the "Reset" button - if this button is
+        # triggered the inputs will be recreated (resetting them to their 
+        # default values)
+        input$reset_sc_inputs
+        
+        # make the inputs
+        make_inputs(variable_config_list = variable_configuration,
+                    variables_to_drop = NA,
+                    append_name = "sc",
+                    return_sliders = FALSE,
+                    return_facets = TRUE)
     })
     
     # enable/disable update/simulate button for for "Explore Mode"
@@ -204,6 +221,19 @@ shinyServer(function(input, output, session) {
                        disabled = TRUE,
                        style = "success")
           
+        })
+    )
+    
+    # on reset, force the Single Case mode input panels open so that all
+    # values reset correctly
+    observeEvent(
+        input$reset_sc_inputs,
+        
+        ({
+            updateCollapse(session, "sc_panels",
+                           open = c("Describe Numeric Features",
+                                    "Describe Categorical Features")
+            )
         })
     )
     

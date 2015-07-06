@@ -124,25 +124,28 @@ shinyUI(navbarPage(
         # define user tools in the first column
         # width = 3 of 12 (Shiny divides the horizontal space up into 12 sections)
         column(3, 
-               bsCollapsePanel(
-                   "Select X-Axis",
-                   
-                   radioButtons("x_axis_choice", 
-                                label = NULL, 
-                                choices = fixed_ui_options$x_axis_options)
-               ),
-               
-               bsCollapsePanel(
-                   "Compare By...",
-                   
-                   radioButtons("facet_choice", 
-                                label = NULL,
-                                choices = c("No Comparison Selected", 
-                                            fixed_ui_options$facet_options))
-               ),
-               
-               bsCollapse(id = "adv_options",
+               bsCollapse(id = "explore_panels",
+                          multiple = TRUE,
                           
+                          bsCollapsePanel(
+                              "Select X-Axis",
+                              
+                              radioButtons("x_axis_choice", 
+                                           label = NULL, 
+                                           choices = fixed_ui_options$x_axis_options)
+                          ),
+                          
+                          bsCollapsePanel(
+                              "Compare By...",
+                              
+                              radioButtons("facet_choice", 
+                                           label = NULL,
+                                           choices = c("No Comparison Selected", 
+                                                       fixed_ui_options$facet_options))
+                          )
+               ),
+               
+               bsCollapse(id = "adv_options",         
                           bsCollapsePanel( 
                               "Advanced Options",
                               
@@ -160,7 +163,7 @@ shinyUI(navbarPage(
                               br(),
                               br(),
                               
-                              uiOutput("explore_input_set"),
+                              uiOutput("explore_slider_set"),
                               br(),
                               
                               actionLink("advanced_options_link",
@@ -229,14 +232,20 @@ shinyUI(navbarPage(
                         block = TRUE,
                         style = "warning"),
                br(),
-               bsCollapse(
+               bsCollapse(id = "sc_panels",
+                          multiple = TRUE,
+                          
                    bsCollapsePanel(
-                       "Describe Case",
+                       "Describe Numeric Features",
                        
-                       uiOutput("sc_input_set")
+                       uiOutput("sc_slider_set")
                    ),
                    
-                   open = "Describe Case"
+                   bsCollapsePanel(
+                       "Describe Categorical Features",
+                       
+                       uiOutput("sc_dropdown_set")
+                   )
                )
         ),
         
