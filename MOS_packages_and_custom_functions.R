@@ -1054,20 +1054,12 @@ make_inputs <- function(variable_config_list,
             
             # generate the dropdowns (and their popovers)
             facet_set <- lapply(1:length(selected_facets), function(i) {
-                popify(
-                    selectInput(
-                        inputId = paste0(append_name,
-                                         "_",
-                                         names(selected_facets)[i]), 
-                        label   = selected_facets[[i]]$pretty_name,
-                        choices = selected_facets[[i]]$ui_levels),
-                    
-                    title     = selected_facets[[i]]$pretty_name,
-                    content   = selected_facets[[i]]$definition,
-                    placement = "right",
-                    trigger   = "hover",
-                    options = list(container = "body")
-                )
+                selectInput(
+                    inputId = paste0(append_name,
+                                     "_",
+                                     names(selected_facets)[i]), 
+                    label   = selected_facets[[i]]$pretty_name,
+                    choices = selected_facets[[i]]$ui_levels)
             })
         }
     }

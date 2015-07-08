@@ -573,12 +573,16 @@ about_body <-
            "Children and linked to administrative data from Children's ",
            "Administration.",
            
-           "<br><br>The data is of limited scope, it includes only cases ",
+           "<br><br>The data are of limited scope, including only cases ",
            "where the child was removed with an active dependency petition ",
            "and entered care in 2008 in Washington State.",
            
+           "<br><br>The data and model were created as part of a study of ",
+           "the relationship between parent engagement with the child welfare ",
+           "system and case outcomes.",
+           
            "<br><br>For a detailed review of the data sources, the data, and
-           the model, please see the publication by POC below.",
+           the model, please see the study by Mienko and colleagues below.",
            
            "<br><br><strong>Publications</strong>",
            "<br>PLACEHOLDER FOR KEY POC PUBLICATION.",
