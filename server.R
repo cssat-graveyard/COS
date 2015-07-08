@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/23/2015
-# Date updated: 7/6/2015
+# Date updated: 7/8/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -174,7 +174,7 @@ shinyServer(function(input, output, session) {
                       variables_to_drop = isolate(x_axis_raw_name())),
         
         ({updateButton(session, "update_explore_cf_cases",
-                       label = "UPDATE PLOT",
+                       label = "Apply Slider Values",
                        disabled = FALSE,
                        style = "danger")
         })
@@ -184,7 +184,7 @@ shinyServer(function(input, output, session) {
         input$update_explore_cf_cases,
         
         ({updateButton(session, "update_explore_cf_cases",
-                       label = "PLOT UPDATED",
+                       label = "Plot Updated",
                        disabled = TRUE,
                        style = "success")
           
@@ -202,11 +202,12 @@ shinyServer(function(input, output, session) {
         
         ({if(isolate(input$update_sc_cf_cases) == 0) {
             updateButton(session, "update_sc_cf_cases",
-                         label = "RUN FIRST SIMULATION",
+                         label = "Simulate",
+                         disabled = FALSE,
                          style = "danger")
         } else {
             updateButton(session, "update_sc_cf_cases",
-                         label = "RE-SIMULATE",
+                         label = "Re-Simulate",
                          disabled = FALSE,
                          style = "danger")
         }
@@ -217,7 +218,7 @@ shinyServer(function(input, output, session) {
         input$update_sc_cf_cases,
         
         ({updateButton(session, "update_sc_cf_cases",
-                       label = "SIMULATION UPDATED",
+                       label = "Simulation Updated",
                        disabled = TRUE,
                        style = "success")
           
@@ -231,8 +232,8 @@ shinyServer(function(input, output, session) {
         
         ({
             updateCollapse(session, "sc_panels",
-                           open = c("Describe Numeric Features",
-                                    "Describe Categorical Features")
+                           open = c("Numeric Features",
+                                    "Categorical Features")
             )
         })
     )

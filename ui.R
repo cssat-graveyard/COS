@@ -2,7 +2,7 @@
 # Contact: bwaismeyer@gmail.com
 
 # Date created: 3/23/2015
-# Date updated: 7/6/2015
+# Date updated: 7/8/2015
 
 ###############################################################################
 ## SCRIPT OVERVIEW
@@ -152,8 +152,9 @@ shinyUI(navbarPage(
                               # button that will apply the slider values (i.e., 
                               # will re-run the simulation with current values)
                               bsButton("update_explore_cf_cases",
-                                       "Update Plot",
-                                       block = TRUE),
+                                       "Apply Slider Values",
+                                       block = TRUE,
+                                       style = "danger"),
                               # button that will reset the values to their defaults (i.e.,
                               # to the median values in the base data set)
                               bsButton("reset_explore_inputs",
@@ -223,8 +224,10 @@ shinyUI(navbarPage(
                # button that will apply the slider/dropdown values (i.e., 
                # will re-run the simulation with current values)
                bsButton("update_sc_cf_cases",
-                        "Simulate",
-                        block = TRUE),
+                        "Describe a Case",
+                        block = TRUE,
+                        disabled = TRUE,
+                        style = "danger"),
                # button that will reset the values to their defaults (i.e.,
                # to the median values in the base data set)
                bsButton("reset_sc_inputs",
@@ -236,13 +239,13 @@ shinyUI(navbarPage(
                           multiple = TRUE,
                           
                    bsCollapsePanel(
-                       "Describe Numeric Features",
+                       "Numeric Features",
                        
                        uiOutput("sc_slider_set")
                    ),
                    
                    bsCollapsePanel(
-                       "Describe Categorical Features",
+                       "Categorical Features",
                        
                        uiOutput("sc_dropdown_set")
                    )
