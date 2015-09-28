@@ -106,6 +106,50 @@ shinyUI(navbarPage(
     
     footer = HTML(footer_text),
     
+    # using MOS to simulate outcomes for fixed predictor values ("Single Case 
+    # Mode")
+    tabPanel("Single Case Mode", fluidPage(
+        # define user tools in the first column
+        column(3,
+               # button that will apply the slider/dropdown values (i.e., 
+               # will re-run the simulation with current values)
+               bsButton("update_sc_cf_cases",
+                        "Describe a Case",
+                        block = TRUE,
+                        disabled = TRUE,
+                        style = "danger"),
+               # button that will reset the values to their defaults (i.e.,
+               # to the median values in the base data set)
+               bsButton("reset_sc_inputs",
+                        "Reset",
+                        block = TRUE,
+                        style = "warning"),
+               br(),
+               bsCollapse(id = "sc_panels",
+                          multiple = TRUE,
+                          
+                          bsCollapsePanel(
+                              "Numeric Features",
+                              
+                              uiOutput("sc_slider_set")
+                          ),
+                          
+                          bsCollapsePanel(
+                              "Categorical Features",
+                              
+                              uiOutput("sc_dropdown_set")
+                          )
+               )
+        ),
+        
+        # define the visualization in the second column
+        column(9,
+               plotOutput("dot_cloud_plot"),
+               
+               HTML(dot_cloud_addendum)
+        )
+    )),
+    
     # using MOS to explore trends per predictor ("Explore Mode")
     tabPanel("Explore Mode", fluidPage(
         # set custom bootstrap.css if desired/available
@@ -213,50 +257,6 @@ shinyUI(navbarPage(
                                    "here</a>."
                        )),
                        size = "large")
-        )
-    )),
-    
-    # using MOS to simulate outcomes for fixed predictor values ("Single Case 
-    # Mode")
-    tabPanel("Single Case Mode", fluidPage(
-        # define user tools in the first column
-        column(3,
-               # button that will apply the slider/dropdown values (i.e., 
-               # will re-run the simulation with current values)
-               bsButton("update_sc_cf_cases",
-                        "Describe a Case",
-                        block = TRUE,
-                        disabled = TRUE,
-                        style = "danger"),
-               # button that will reset the values to their defaults (i.e.,
-               # to the median values in the base data set)
-               bsButton("reset_sc_inputs",
-                        "Reset",
-                        block = TRUE,
-                        style = "warning"),
-               br(),
-               bsCollapse(id = "sc_panels",
-                          multiple = TRUE,
-                          
-                   bsCollapsePanel(
-                       "Numeric Features",
-                       
-                       uiOutput("sc_slider_set")
-                   ),
-                   
-                   bsCollapsePanel(
-                       "Categorical Features",
-                       
-                       uiOutput("sc_dropdown_set")
-                   )
-               )
-        ),
-        
-        # define the visualization in the second column
-        column(9,
-               plotOutput("dot_cloud_plot"),
-               
-               HTML(dot_cloud_addendum)
         )
     )),
     
