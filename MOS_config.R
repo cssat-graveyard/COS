@@ -495,7 +495,7 @@ custom_outcome_colors <- c("#D9BB32", "#6DB33F", "#6E9CAE", "#B1662B",
 
 # Custom bootstrap.css file must be in the www subdirectory of the MOS
 # application. Set "custom_css" to NULL if you don't want to use one.
-custom_css = "united.min.css"
+main_style = "poc_style.css"
 # CSS theme for entire project (current theme from here:
 # https://bootswatch.com/sandstone/)
 

@@ -202,14 +202,10 @@ shinyServer(function(input, output, session) {
         
         ({if(isolate(input$update_sc_cf_cases) == 0) {
             updateButton(session, "update_sc_cf_cases",
-                         label = "Simulate",
-                         disabled = FALSE,
-                         style = "danger")
+                         disabled = FALSE)
         } else {
             updateButton(session, "update_sc_cf_cases",
-                         label = "Re-Simulate",
-                         disabled = FALSE,
-                         style = "danger")
+                         disabled = FALSE)
         }
         })
     )
@@ -218,9 +214,7 @@ shinyServer(function(input, output, session) {
         input$update_sc_cf_cases,
         
         ({updateButton(session, "update_sc_cf_cases",
-                       label = "Simulation Updated",
-                       disabled = TRUE,
-                       style = "success")
+                       disabled = TRUE)
           
         })
     )

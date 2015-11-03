@@ -100,174 +100,235 @@ raw_pretty_pairs <<- as.data.frame(raw_pretty_pairs)$pretty_name
 ###############################################################################
 ## SHINY UI LOOP
 
-shinyUI(navbarPage(
-    # global application settings
-    MOS_instance_name,
+shinyUI(fluidPage(
+    # adjust the page style to be less cray cray
+    style = "padding:0;",
     
-    footer = HTML(footer_text),
-    
-    # using MOS to simulate outcomes for fixed predictor values ("Single Case 
-    # Mode")
-    tabPanel("Single Case Mode", fluidPage(
-        # define user tools in the first column
-        column(3,
-               # button that will apply the slider/dropdown values (i.e., 
-               # will re-run the simulation with current values)
-               bsButton("update_sc_cf_cases",
-                        "Describe a Case",
-                        block = TRUE,
-                        disabled = TRUE,
-                        style = "danger"),
-               # button that will reset the values to their defaults (i.e.,
-               # to the median values in the base data set)
-               bsButton("reset_sc_inputs",
-                        "Reset",
-                        block = TRUE,
-                        style = "warning"),
-               br(),
-               bsCollapse(id = "sc_panels",
-                          multiple = TRUE,
-                          
-                          bsCollapsePanel(
-                              "Numeric Features",
-                              
-                              uiOutput("sc_slider_set")
-                          ),
-                          
-                          bsCollapsePanel(
-                              "Categorical Features",
-                              
-                              uiOutput("sc_dropdown_set")
-                          )
-               )
-        ),
-        
-        # define the visualization in the second column
-        column(9,
-               plotOutput("dot_cloud_plot"),
-               
-               HTML(dot_cloud_addendum)
+    # customize the HTML head elements for the app (i.e., the HTML metadata)
+    withTags(
+        head(
+            # load custom CSS (this will look for CSS files in the "www"
+            # folder of the app by default)
+            link(rel = "stylesheet", type = "text/css", 
+                 href = main_style)
         )
-    )),
+    ),
     
-    # using MOS to explore trends per predictor ("Explore Mode")
-    tabPanel("Explore Mode", fluidPage(
-        # set custom bootstrap.css if desired/available
-        # you can specify multiple css files here if desired (e.g., to load
-        # a small custom .css file to override some bootstrap behavior)
-        # this adjusts BOTH modes even though it only occurs in the "Explore
-        # Mode" section
-        tags$head(
-            tags$link(rel = "stylesheet", type = "text/css", 
-                      href = custom_css),
-            tags$link(rel = "stylesheet", type = "text/css", 
-                      href = "custom.css")
+    # POC custom nav elements
+    HTML('
+        <nav class="navbar navbar-default navbar-static-top" role="navigation">
+            <div class="container">
+                <a class="navbar-brand" href="http://pocdata.org/">
+                    <img src="logo-01.png">
+                </a>
+                <ul class="nav navbar-nav pull-right">
+                    <li><a href="http://pocdata.org/browse" class="btn btn-primary">Back to Browse</a></li>
+                </ul>
+            </div>
+        </nav>
+    '),
+    
+    # POC custom title panel
+    HTML('
+        <div class="jumbotron text-center">
+            <h1>The Case Outcome Simulator</h1>
+        </div>   
+    '),
+    
+    # apply a global style to the tab nav
+    div(
+        class = "gray-tabs",
+        
+        tabsetPanel(
+            # using MOS to simulate outcomes for fixed predictor values ("Single Case 
+            # Mode")
+            tabPanel("Single Case Mode",
+                     # set panel class
+                     class = "container",
+                     
+                     # define user tools in the first column
+                     column(4,
+                            div(
+                                # button that will apply the slider/dropdown values (i.e., 
+                                # will re-run the simulation with current values)
+                                bsButton("update_sc_cf_cases",
+                                         "Simulate",
+                                         block = FALSE,
+                                         disabled = TRUE,
+                                         class = "btn-primary"),
+                                # button that will reset the values to their defaults (i.e.,
+                                # to the median values in the base data set)
+                                bsButton("reset_sc_inputs",
+                                         "Reset",
+                                         block = FALSE,
+                                         class = "btn-primary"),
+                                class = "btn-group btn-group-justified"
+                            ),
+                            
+                            bsCollapse(id = "sc_panels",
+                                       multiple = TRUE,
+                                       
+                                       bsCollapsePanel(
+                                           "Numeric Features",
+                                           
+                                           uiOutput("sc_slider_set")
+                                       ),
+                                       
+                                       bsCollapsePanel(
+                                           "Categorical Features",
+                                           
+                                           uiOutput("sc_dropdown_set")
+                                       )
+                                       
+                            )
+                     ),
+                     
+                     # define the visualization in the second column
+                     column(8,
+                            plotOutput("dot_cloud_plot"),
+                            
+                            br(),
+                            HTML(dot_cloud_addendum)
+                     )
+            ),
             
-        ),
-        
-        # define user tools in the first column
-        # width = 3 of 12 (Shiny divides the horizontal space up into 12 sections)
-        column(3, 
-               bsCollapse(id = "explore_panels",
-                          multiple = TRUE,
-                          
-                          bsCollapsePanel(
-                              "Select X-Axis",
-                              
-                              radioButtons("x_axis_choice", 
-                                           label = NULL, 
-                                           choices = fixed_ui_options$x_axis_options)
-                          ),
-                          
-                          bsCollapsePanel(
-                              "Compare By...",
-                              
-                              radioButtons("facet_choice", 
-                                           label = NULL,
-                                           choices = c("No Comparison Selected", 
-                                                       fixed_ui_options$facet_options))
-                          )
-               ),
-               
-               bsCollapse(id = "adv_options",         
-                          bsCollapsePanel( 
-                              "Advanced Options",
-                              
-                              # button that will apply the slider values (i.e., 
-                              # will re-run the simulation with current values)
-                              bsButton("update_explore_cf_cases",
-                                       "Apply Slider Values",
-                                       block = TRUE,
-                                       style = "danger"),
-                              # button that will reset the values to their defaults (i.e.,
-                              # to the median values in the base data set)
-                              bsButton("reset_explore_inputs",
-                                       "Reset",
-                                       block = TRUE,
-                                       style = "warning"),
-                              br(),
-                              br(),
-                              
-                              uiOutput("explore_slider_set"),
-                              br(),
-                              
-                              actionLink("advanced_options_link",
-                                         "What do Advanced Options do?")
-                          )
-               )
-        ),
-        
-        # define the visualization in the second column
-        # width = 9 of 12
-        column(9, 
-               plotOutput("ribbon_plot"),
-               
-               uiOutput("ribbon_text"),
-               HTML(ribbon_addendum),
-               
-               bsModal("advanced_options_description",
-                       "What do 'Advanced Options' do?",
-                       "advanced_options_link",
-                       HTML(paste0("In the default view, when you select ",
-                                   "an x-axis variable the unselected ",
-                                   "variables are set to a reasonable ",
-                                   "value for you. Basically, we ",
-                                   "say: 'If we didn't know these values ",
-                                   "for a particular case, what would be ",
-                                   "the most appropriate guess to make?' ",
-                                   "We use the median values observed ",
-                                   "in our source data to set the ",
-                                   "values for the unselected ",
-                                   "variables.<br><br>",
-                                   "Advanced Options allows you to set ",
-                                   "the unselected x-axis variables to ",
-                                   "values of your choosing.<br><br>",
-                                   "This can be used to explore how the ",
-                                   "observed relationship between the ",
-                                   "selected x-axis variable and the ",
-                                   "simulated case outcomes changes ",
-                                   "dependent on the context of the other ",
-                                   "variables.<br><br>",
-                                   "More technically, this allows you to ",
-                                   "explore possible interactions among ",
-                                   "the predictor variables. For the ",
-                                   "interested reader, a simple, solid ",
-                                   "tutorial on interactions is available ",
-                                   "<a href=\"https://cdn1.sph.harvard.edu/wp-content/uploads/sites/603/2013/03/InteractionTutorial.pdf\">",
-                                   "here</a>."
-                       )),
-                       size = "large")
+            # using MOS to explore trends per predictor ("Explore Mode")
+            tabPanel("Explore Mode",
+                     # set panel class
+                     class = "container",
+                     
+                     # define user tools in the first column
+                     # width = 3 of 12 (Shiny divides the horizontal space up into 12 sections)
+                     column(3, 
+                            bsCollapse(id = "explore_panels",
+                                       multiple = TRUE,
+                                       
+                                       bsCollapsePanel(
+                                           "Select X-Axis",
+                                           
+                                           radioButtons("x_axis_choice", 
+                                                        label = NULL, 
+                                                        choices = fixed_ui_options$x_axis_options)
+                                       ),
+                                       
+                                       bsCollapsePanel(
+                                           "Compare By...",
+                                           
+                                           radioButtons("facet_choice", 
+                                                        label = NULL,
+                                                        choices = c("No Comparison Selected", 
+                                                                    fixed_ui_options$facet_options))
+                                       )
+                            ),
+                            
+                            bsCollapse(id = "adv_options",         
+                                       bsCollapsePanel( 
+                                           "Advanced Options",
+                                           
+                                           # button that will apply the slider values (i.e., 
+                                           # will re-run the simulation with current values)
+                                           bsButton("update_explore_cf_cases",
+                                                    "Apply Slider Values",
+                                                    block = TRUE,
+                                                    style = "danger"),
+                                           # button that will reset the values to their defaults (i.e.,
+                                           # to the median values in the base data set)
+                                           bsButton("reset_explore_inputs",
+                                                    "Reset",
+                                                    block = TRUE,
+                                                    style = "warning"),
+                                           br(),
+                                           br(),
+                                           
+                                           uiOutput("explore_slider_set"),
+                                           br(),
+                                           
+                                           actionLink("advanced_options_link",
+                                                      "What do Advanced Options do?")
+                                       )
+                            )
+                     ),
+                     
+                     # define the visualization in the second column
+                     # width = 9 of 12
+                     column(9, 
+                            plotOutput("ribbon_plot"),
+                            
+                            uiOutput("ribbon_text"),
+                            
+                            HTML(ribbon_addendum),
+                            
+                            bsModal("advanced_options_description",
+                                    "What do 'Advanced Options' do?",
+                                    "advanced_options_link",
+                                    HTML(paste0("In the default view, when you select ",
+                                                "an x-axis variable the unselected ",
+                                                "variables are set to a reasonable ",
+                                                "value for you. Basically, we ",
+                                                "say: 'If we didn't know these values ",
+                                                "for a particular case, what would be ",
+                                                "the most appropriate guess to make?' ",
+                                                "We use the median values observed ",
+                                                "in our source data to set the ",
+                                                "values for the unselected ",
+                                                "variables.<br><br>",
+                                                "Advanced Options allows you to set ",
+                                                "the unselected x-axis variables to ",
+                                                "values of your choosing.<br><br>",
+                                                "This can be used to explore how the ",
+                                                "observed relationship between the ",
+                                                "selected x-axis variable and the ",
+                                                "simulated case outcomes changes ",
+                                                "dependent on the context of the other ",
+                                                "variables.<br><br>",
+                                                "More technically, this allows you to ",
+                                                "explore possible interactions among ",
+                                                "the predictor variables. For the ",
+                                                "interested reader, a simple, solid ",
+                                                "tutorial on interactions is available ",
+                                                "<a href=\"https://cdn1.sph.harvard.edu/wp-content/uploads/sites/603/2013/03/InteractionTutorial.pdf\">",
+                                                "here</a>."
+                                    )),
+                                    size = "large")
+                     )
+            ),
+            
+            # an "About" section where additional information can be provided about
+            # the application instance
+            tabPanel(about_title,
+                     # set panel class
+                     class = "container",
+                     column(8, offset = 2,
+                            
+                            HTML(about_body)
+                     )
+            )
         )
-    )),
+    ),
     
-    # an "About" section where additional information can be provided about
-    # the application instance
-    tabPanel(about_title, fluidPage(
-        column(8, offset = 2,
-               
-               HTML(about_body)
-        )
-    ))
+    # define the app footer
+    withTags(
+            footer(
+                class = "page-footer",
+                HTML("
+        <div class='row'>
+            <div class='description text-center'>
+                <p>
+                Partners for Our Children's Child Well-Being Data Portal promotes access to and 
+                understanding of child welfare in Washington.
+                </p>
+            </div>
+            <div class='text-center'>
+                <p>PO Box 359476</p>
+                <p>Seattle, WA 98195-9476</p>
+                <p>206 221-3100</p>
+            </div>
+        </div>
+        <div class='footer-copyright text-right'>
+            <p>&copy;2015 Partners for Our Children</p>
+        </div>
+            "))
+    )
 ))
 
 ###############################################################################
