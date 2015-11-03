@@ -147,7 +147,7 @@ shinyUI(fluidPage(
                      class = "container",
                      
                      # define user tools in the first column
-                     column(4,
+                     column(3,
                             div(
                                 # button that will apply the slider/dropdown values (i.e., 
                                 # will re-run the simulation with current values)
@@ -184,7 +184,7 @@ shinyUI(fluidPage(
                      ),
                      
                      # define the visualization in the second column
-                     column(8,
+                     column(9,
                             plotOutput("dot_cloud_plot"),
                             
                             br(),
