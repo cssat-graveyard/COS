@@ -118,7 +118,7 @@ shinyUI(fluidPage(
     HTML('
         <nav class="navbar navbar-default navbar-static-top" role="navigation">
             <div class="container">
-                <a class="navbar-brand" href="http://pocdata.org/">
+                <a class="navbar-brand" href="http://pocdata.org/" style="padding:10px;">
                     <img src="logo-01.png">
                 </a>
                 <ul class="nav navbar-nav pull-right">

@@ -2374,8 +2374,9 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 
 .navbar-default .navbar-nav > li > a.btn-primary {
   color: #fff;
-  line-height: 16px;
-  margin-top: 5px;
+  line-height: 6px;
+  margin: 5px 0;
+  padding: 16px 24px;
 }
 
 .navbar-default .navbar-nav > li > a:hover,
@@ -4727,6 +4728,7 @@ footer.page-footer {
     background: #4d4d4d;
     color: #a9a9a9;
     padding-top: 4rem;
+    font-size: 18px;
 }
 
 footer.page-footer .row {
