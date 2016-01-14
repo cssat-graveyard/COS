@@ -240,7 +240,7 @@ sudo apt-get install libxml2-dev
 Now we clone the app...
 ```
 cd /home/ubuntu/shiny_apps/
-git clone https://github.com/pocdata/sim-tool
+git clone https://github.com/pocdata/COS
 ```
 
 And initialize R in the COS Shiny project folder - "packrat" should 
