@@ -89,7 +89,13 @@ repositories. The default R repository is usually badly out of date. We want to
 specify one of the official CRAN repositories to insure we get the most up to 
 date version of R and packages.
 
-From the putty console, we're going to edit (and if needed create) an extra 
+First we make sure all the server files are up to date.
+```
+sudo apt-get update
+sudo apt-get upgrade
+```
+
+Then, from the putty console, we're going to edit (and if needed create) an extra 
 depository-specification file:
 ```
 sudo vi /etc/apt/sources.list.d/sources.list
@@ -97,8 +103,15 @@ sudo vi /etc/apt/sources.list.d/sources.list
 
 Then we want to add this line to the file and save it.
 ```
-deb https://cran.fhcrc.org/bin/linux/ubuntu/trusty/
+deb https://cran.fhcrc.org/bin/linux/ubuntu trusty/
 ```
+
+Finally, we re-run update one more time to insure the server is prepared
+to work with our target CRAN mirror.
+```
+sudo apt-get update
+```
+
 **Notes**
 * If you have any trouble using the vi editor, here's a 
     [good cheet sheet](http://www.lagmonster.org/docs/vi.html).
@@ -112,18 +125,13 @@ deb https://cran.fhcrc.org/bin/linux/ubuntu/trusty/
 ### Install and Configure R, Shiny, and Shiny Server
 Alright, it's time at last to get our core tools installed and configured. The 
 steps below are described in more detail 
-[here](https://github.com/chrisrzhou/RShiny-EC2Bootstrap#install-r).
-
-First we make sure all the server files are up to date.
-```
-sudo apt-get update
-```
+[here](https://github.com/chrisrzhou/RShiny-EC2Bootstrap#install-r) and 
+[here](http://www.r-bloggers.com/instructions-for-installing-using-r-on-amazon-ec2/).
 
 Then we install base R and the R development tools.
 ```
 sudo apt-get install r-base
 sudo apt-get install r-base-dev
-sudo apt-get install 
 ```
 
 **Note**: You might get authentication warnings. Ignore these (say yes where 
