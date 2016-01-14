@@ -246,7 +246,7 @@ git clone https://github.com/pocdata/COS
 And initialize R in the COS Shiny project folder - "packrat" should 
 automatically try to install all needed packages.
 ```
-cd /home/ubuntu/shiny_apps/sim-tool/COS\ Shiny\ project/
+cd /home/ubuntu/shiny_apps/COS\ Shiny\ project/
 R
 ```
 
