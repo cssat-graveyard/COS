@@ -25,6 +25,9 @@ As of this writing, the available modes are:
 Currently this application is deployed via 
 [Amazon's EC2 service](http://aws.amazon.com/ec2/?sc_channel=PS&sc_campaign=acquisition_US&sc_publisher=google&sc_medium=ec2_b&sc_content=ec2_e&sc_detail=amazon.ec2&sc_category=ec2&sc_segment=53611778562&sc_matchtype=e&sc_country=US&s_kwcid=AL!4422!3!53611778562!e!!g!!amazon.ec2&ef_id=VTlq7QAAAQOLjYDQ:20150511210335:s). 
 
+You can sign in to the [POC AWS here](https://804797177177.signin.aws.amazon.com/console), 
+though you'll need proper credentials.
+
 What follows will describe how to setup a (free) micro instance for the COS 
 using the EC2 Ubuntu AMI.
 
