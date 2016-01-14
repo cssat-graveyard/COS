@@ -4,7 +4,7 @@ case outcomes through simulation and visualization. It is an instance of the
 [Multinomial Outcome Simulator (MOS)](https://github.com/bwaismeyer/MOS_framework).
 
 The COS can be seen in action 
-[here](http://ec2-52-8-38-141.us-west-1.compute.amazonaws.com:3939/COS/).
+[here](http://ec2-54-183-103-46.us-west-1.compute.amazonaws.com:3939/COS/).
 
 Specifically, targeted user groups interact with the application by adjusting 
 model inputs and then observing as the application simulates likelihoods for 
