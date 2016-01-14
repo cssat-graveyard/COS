@@ -97,7 +97,7 @@ sudo vi /etc/apt/sources.list.d/sources.list
 
 Then we want to add this line to the file and save it.
 ```
-deb https://cran.fhcrc.org/bin/linux/ubuntu trusty/
+deb https://cran.fhcrc.org/bin/linux/ubuntu/trusty/
 ```
 **Notes**
 * If you have any trouble using the vi editor, here's a 
