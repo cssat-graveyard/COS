@@ -167,9 +167,13 @@ install.packages("packrat")
 q()
 ```
 
-And now we install Shiny Server.
+And now we install Shiny Server. The way we install this has changed a few times -
+when in doubt, check [here](https://www.rstudio.com/products/shiny/download-server/) 
+for updated instructions (and to get the latest version number).
 ```
-sudo apt-get install shiny-server
+sudo apt-get install gdebi-core
+wget https://download3.rstudio.org/ubuntu-12.04/x86_64/shiny-server-1.4.1.759-amd64.deb
+sudo gdebi shiny-server-1.4.1.759-amd64.deb
 ```
 
 We configure Shiny Server to run under the appropriate user account (ubuntu) 
