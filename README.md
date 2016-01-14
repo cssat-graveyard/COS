@@ -231,8 +231,12 @@ However, the Cairo and xml2 packages require additional material be available
 on the instance. Attempts to to install these will fail unless the correct 
 resources are added to our EC2 server.
 
-I THINK the only packages missing from the default EC2 setup are these.
+I THINK the only packages missing from the default EC2 setup are these. Keep
+an eye out during the "packrat" step (a little ways below) - if install
+errors happen, these are often dependency related and the errors will
+sometimes point you to dependencies needed.
 ```
+sudo apt-get install libcurl4-openssl-dev
 sudo apt-get install libcairo2-dev
 sudo apt-get install libxml2-dev
 ```
