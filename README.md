@@ -101,9 +101,13 @@ depository-specification file:
 sudo vi /etc/apt/sources.list.d/sources.list
 ```
 
-Then we want to add this line to the file and save it.
+Then we want to add these lines to the file and save it. The first is for our target R
+mirror (I've chosen a Seattle-based mirror). The second is for a mirror allowing Ubuntu
+to get older files it may need to support the R installation (see more about this
+[here](https://cran.cnr.berkeley.edu/bin/linux/ubuntu/)).
 ```
 deb https://cran.fhcrc.org/bin/linux/ubuntu trusty/
+deb http://mirrors.ocf.berkeley.edu/ubuntu/ trusty-backports main restricted universe
 ```
 
 Finally, we re-run update one more time to insure the server is prepared
