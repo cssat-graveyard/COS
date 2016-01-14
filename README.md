@@ -134,7 +134,9 @@ steps below are described in more detail
 
 Then we install base R and the R development tools.
 ```
+sudo apt-get build-dep r-base
 sudo apt-get install r-base
+sudo apt-get build-dep r-base-dev
 sudo apt-get install r-base-dev
 ```
 
